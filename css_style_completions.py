@@ -74,8 +74,10 @@ class CssStyleCompletion():
             return self._extractCssClasses(view)
 
     def _extractCssClasses(self, view):
+        # get filename with extension
+        file_name = os.path.basename(view.file_name())
         results = [
-            (view.substr(point).replace('.','') + "\t CSS", view.substr(point).replace('.',''))
+            (view.substr(point).replace('.','') + "\t " + file_name, view.substr(point).replace('.',''))
             # TODO: allow selectors to be modified by a setting file
             for point in view.find_by_selector('entity.other.attribute-name.class.css')
         ]
