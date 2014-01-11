@@ -112,6 +112,7 @@ css_data = """
 "border-width"=<border-width>
 "box-decoration-break"=slice | clone
 "box-shadow"=none | <shadow> | none
+"box-sizing"=border-box | padding-box
 """
 
 def parse_css_data(data):
