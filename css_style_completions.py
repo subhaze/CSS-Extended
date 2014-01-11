@@ -1,11 +1,10 @@
-import sublime, sublime_plugin, os, json
+import sublime, sublime_plugin, os, json, sys
 
 cssStyleCompletion = None
 
-
 def plugin_loaded():
     global cssStyleCompletion
-    cache_path = os.path.join(sublime.cache_path(), 'CSS.cache')
+    cache_path = os.path.join(sublime.cache_path(), 'CSS/CSS.completions.cache')
     cssStyleCompletion = CssStyleCompletion(cache_path)
 
 
@@ -16,20 +15,23 @@ class CssStyleCompletion():
 
     def _loadCache(self):
         try:
-            json_data = open(self.cache_path, 'r').read()
-            self.projects_cache = json.loads(json_data)
+            json_data = open(self.cache_path, 'r')
+            self.projects_cache = json.loads(json_data.read())
             json_data.close()
         except:
             self.projects_cache = {}
 
     def _saveCache(self, view):
-        project_key = self.getProjectKeyOfView(view)
-        # not within a project
-        if not project_key: return
-        # within project but no cache yet
+        file_key, project_key = self.getProjectKeysOfView(view)
+        # if there is no project_key set the project_key as the file_key
+        # so that we can cache on a per file basis
+        if not project_key:
+            project_key = file_key
+        # no cache yet
         if project_key not in self.projects_cache:
             # load up cache with all view files that are open and exit
-            self.projects_cache[project_key] = self._returnViewCompletions(view)
+            self.projects_cache[project_key] = self._extractCssClasses(view)
+
         # lazily build cache per view save
         elif project_key in self.projects_cache:
             current_cache = self.projects_cache[project_key]
@@ -41,18 +43,40 @@ class CssStyleCompletion():
         json_data.write(json.dumps(self.projects_cache))
         json_data.close()
 
-    def getProjectKeyOfView(self, view):
-        return view.window().project_file_name()
+    def getProjectKeysOfView(self, view, return_both=False):
+        # TODO: make this extension list a setting
+        project_name = view.window().project_file_name()
+        css_extension = ('.css', '.less')
+        file_extension = os.path.splitext(view.file_name())[1]
+        file_name = view.file_name()
+        # if we have a project and we're working in a stand alone style file
+        # return the project file name as the key
+        if file_extension in css_extension and project_name:
+            return (file_name, project_name)
+        # if we are not overriding to get both keys
+        # just return the file_name/file_key
+        if not return_both:
+            return (file_name, None)
+        elif return_both and project_name:
+            return (file_name, project_name)
 
     def returnClassCompletions(self, view):
-        project_key = self.getProjectKeyOfView(view)
-        if project_key and project_key in self.projects_cache:
-            return self.projects_cache[project_key]
-        else: return self._returnViewCompletions(view)
+        file_key, project_key = self.getProjectKeysOfView(view, return_both=True)
+        completion_list = []
+        if file_key in self.projects_cache:
+            completion_list = self.projects_cache[file_key]
+        if project_key in self.projects_cache:
+            completion_list = completion_list + self.projects_cache[project_key]
+        if completion_list:
+            return completion_list
+        else:
+            # we have no cache so just return whats in the current view
+            return self._extractCssClasses(view)
 
     def _extractCssClasses(self, view):
         results = [
             (view.substr(point).replace('.','') + "\t CSS", view.substr(point).replace('.',''))
+            # TODO: allow selectors to be modified by a setting file
             for point in view.find_by_selector('entity.other.attribute-name.class.css')
         ]
         return list(set(results))
