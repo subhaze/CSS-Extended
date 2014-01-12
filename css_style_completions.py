@@ -1,9 +1,11 @@
 import sublime, sublime_plugin, os, json, sys
+from collections import OrderedDict
 
 cssStyleCompletion = None
+cache_path = None
 
 def plugin_loaded():
-    global cssStyleCompletion
+    global cssStyleCompletion, cache_path
     cache_path = os.path.join(sublime.cache_path(), 'CSS/CSS.completions.cache')
     cssStyleCompletion = CssStyleCompletion(cache_path)
 
@@ -36,8 +38,14 @@ class CssStyleCompletion():
         elif project_key in self.projects_cache:
             current_cache = self.projects_cache[project_key]
             new_cache = self._extractCssClasses(view)
+
+            # the following products a list of tuples and list
             new_cache += current_cache
-            self.projects_cache[project_key][:] = list(set(new_cache))
+            # normalize list to be a list of tuples and remove duplicates
+            new_cache_set = set(tuple(item) for item in new_cache)
+            # now convert to a list of list for saving.
+            new_cache = [list(item) for item in new_cache_set]
+            self.projects_cache[project_key][:] = new_cache
         # save data to disk
         json_data = open(self.cache_path, 'w')
         json_data.write(json.dumps(self.projects_cache))
@@ -90,14 +98,29 @@ class CssStyleCompletion():
         return list(set(results))
 
 
+class CssStyleCompletionDeleteCacheCommand(sublime_plugin.WindowCommand):
+    """Deletes all cache that plugin has created"""
+    global cache_path, cssStyleCompletion
+
+    def run(self):
+        if cache_path:
+            os.remove(cache_path)
+            cssStyleCompletion.projects_cache = {}
+
+
 class CssStyleCompletionEvent(sublime_plugin.EventListener):
     global cssStyleCompletion
+
     def on_post_save_async(self, view):
         cssStyleCompletion._saveCache(view)
 
     def on_query_completions(self, view, prefix, locations):
         selector = view.match_selector(locations[0], 'text.html string')
-        attribute = view.expand_by_class(locations[0], sublime.CLASS_PUNCTUATION_START | sublime.CLASS_PUNCTUATION_END, '"\'')
+        attribute = view.expand_by_class(
+            locations[0],
+            sublime.CLASS_PUNCTUATION_START | sublime.CLASS_PUNCTUATION_END,
+            '"\''
+        )
         start = attribute.begin() - 7
         end = attribute.end()
         attribute = view.substr(sublime.Region(start, end))
