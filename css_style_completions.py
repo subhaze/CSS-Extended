@@ -1,8 +1,8 @@
-import sublime, sublime_plugin, os, json, sys
-from collections import OrderedDict
+import sublime, sublime_plugin, os, json
 
 cssStyleCompletion = None
 cache_path = None
+
 
 def plugin_loaded():
     global cssStyleCompletion, cache_path
@@ -69,12 +69,17 @@ class CssStyleCompletion():
             return (file_name, project_name)
 
     def returnClassCompletions(self, view):
-        file_key, project_key = self.getProjectKeysOfView(view, return_both=True)
+        file_key, project_key = self.getProjectKeysOfView(
+            view,
+            return_both=True
+        )
         completion_list = []
+
         if file_key in self.projects_cache:
             completion_list = self.projects_cache[file_key]
         if project_key in self.projects_cache:
             completion_list = completion_list + self.projects_cache[project_key]
+
         if completion_list:
             return completion_list
         else:
@@ -84,10 +89,14 @@ class CssStyleCompletion():
     def _extractCssClasses(self, view):
         # get filename with extension
         file_name = os.path.basename(view.file_name())
+        # TODO: allow selectors to be modified by a setting file
+        symbols = view.find_by_selector('entity.other.attribute-name.class.css')
         results = [
-            (view.substr(point).replace('.','') + "\t " + file_name, view.substr(point).replace('.',''))
-            # TODO: allow selectors to be modified by a setting file
-            for point in view.find_by_selector('entity.other.attribute-name.class.css')
+            (
+                view.substr(point).replace('.','') + "\t " + file_name,
+                view.substr(point).replace('.','')
+            )
+            for point in symbols
         ]
         return list(set(results))
 
