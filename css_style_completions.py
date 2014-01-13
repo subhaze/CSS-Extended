@@ -3,14 +3,23 @@ import sublime, sublime_plugin, os, json
 cssStyleCompletion = None
 cache_path = None
 ST2 = int(sublime.version()) < 3000
-cache_path = os.path.join(
-    sublime.packages_path(),
-    '..',
-    'Cache',
-    'CSS',
-    'CSS.completions.cache'
-)
-cache_dir = os.path.splitext(cache_path)[0]
+
+if ST2:
+    cache_path = os.path.join(
+        sublime.packages_path(),
+        '..',
+        'Cache',
+        'CSS',
+        'CSS.completions.cache'
+    )
+if not ST2:
+    cache_path = os.path.join(
+        sublime.cache_path(),
+        'CSS',
+        'CSS.completions.cache'
+    )
+
+cache_dir = cache_path.replace('CSS.completions.cache', '')
 
 if not os.path.exists(cache_dir):
     os.makedirs(cache_dir)
@@ -23,7 +32,7 @@ def plugin_loaded():
 
 class CssStyleCompletion():
     def __init__(self, cache_path):
-        self.cache_path = cache_path
+        self.cache_path = os.path.abspath(cache_path)
         self._loadCache()
 
     def _loadCache(self):
@@ -89,13 +98,16 @@ class CssStyleCompletion():
         )
         completion_list = []
 
+
+
         if file_key in self.projects_cache:
             completion_list = self.projects_cache[file_key]
         if project_key in self.projects_cache:
             completion_list = completion_list + self.projects_cache[project_key]
 
+
         if completion_list:
-            return completion_list
+            return [ tuple(completions) for completions in completion_list]
         else:
             # we have no cache so just return whats in the current view
             return self._extractCssClasses(view)
