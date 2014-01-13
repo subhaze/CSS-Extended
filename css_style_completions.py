@@ -87,17 +87,17 @@ class CssStyleCompletion():
             return self._extractCssClasses(view)
 
     def _extractCssClasses(self, view):
+        def genCompletionSet(symbols):
+            return [(
+                symbol + "\t " + file_name, symbol
+            ) for symbol in symbols.split('.')[1:]]
         # get filename with extension
         file_name = os.path.basename(view.file_name())
         # TODO: allow selectors to be modified by a setting file
         symbols = view.find_by_selector('entity.other.attribute-name.class.css')
-        results = [
-            (
-                view.substr(point).replace('.','') + "\t " + file_name,
-                view.substr(point).replace('.','')
-            )
-            for point in symbols
-        ]
+        results = []
+        for point in symbols:
+            results.extend(genCompletionSet(view.substr(point)))
         return list(set(results))
 
     def _returnViewCompletions(self, view):
