@@ -2,11 +2,22 @@ import sublime, sublime_plugin, os, json
 
 cssStyleCompletion = None
 cache_path = None
+ST2 = int(sublime.version()) < 3000
+cache_path = os.path.join(
+    sublime.packages_path(),
+    '..',
+    'Cache',
+    'CSS',
+    'CSS.completions.cache'
+)
+cache_dir = os.path.splitext(cache_path)[0]
+
+if not os.path.exists(cache_dir):
+    os.makedirs(cache_dir)
 
 
 def plugin_loaded():
     global cssStyleCompletion, cache_path
-    cache_path = os.path.join(sublime.cache_path(), 'CSS/CSS.completions.cache')
     cssStyleCompletion = CssStyleCompletion(cache_path)
 
 
@@ -52,8 +63,11 @@ class CssStyleCompletion():
         json_data.close()
 
     def getProjectKeysOfView(self, view, return_both=False):
+        if ST2:
+            project_name = '-'.join(view.window().folders())
+        else:
+            project_name = view.window().project_file_name()
         # TODO: make this extension list a setting
-        project_name = view.window().project_file_name()
         css_extension = ('.css', '.less')
         file_extension = os.path.splitext(view.file_name())[1]
         file_name = view.file_name()
@@ -106,6 +120,27 @@ class CssStyleCompletion():
             results += self._extractCssClasses(view)
         return list(set(results))
 
+    def at_html_attribute(self, attribute, view, locations):
+        selector = view.match_selector(locations[0], 'text.html string')
+        if not selector:
+            return False
+        check_attribute = ''
+        view_point = locations[0]
+        char = ''
+        while(char != ' ' and view_point > -1):
+                char = view.substr(view_point)
+                if(char != ' '):
+                    check_attribute += char
+                view_point -= 1
+        check_attribute = check_attribute[::-1]
+        if check_attribute.startswith(attribute):
+                return True
+        return False
+
+
+if ST2:
+    cssStyleCompletion = CssStyleCompletion(cache_path)
+
 
 class CssStyleCompletionDeleteCacheCommand(sublime_plugin.WindowCommand):
     """Deletes all cache that plugin has created"""
@@ -120,18 +155,14 @@ class CssStyleCompletionDeleteCacheCommand(sublime_plugin.WindowCommand):
 class CssStyleCompletionEvent(sublime_plugin.EventListener):
     global cssStyleCompletion
 
+    def on_post_save(self, view):
+        if not ST2:
+            return
+        cssStyleCompletion._saveCache(view)
+
     def on_post_save_async(self, view):
         cssStyleCompletion._saveCache(view)
 
     def on_query_completions(self, view, prefix, locations):
-        selector = view.match_selector(locations[0], 'text.html string')
-        attribute = view.expand_by_class(
-            locations[0],
-            sublime.CLASS_PUNCTUATION_START | sublime.CLASS_PUNCTUATION_END,
-            '"\''
-        )
-        start = attribute.begin() - 7
-        end = attribute.end()
-        attribute = view.substr(sublime.Region(start, end))
-        if selector and attribute.startswith('class'):
+        if cssStyleCompletion.at_html_attribute('class', view, locations):
             return (cssStyleCompletion.returnClassCompletions(view), 0)
