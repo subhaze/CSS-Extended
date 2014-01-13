@@ -64,7 +64,7 @@ class CssStyleCompletion():
             # normalize list to be a list of tuples and remove duplicates
             new_cache_set = set(tuple(item) for item in new_cache)
             # now convert to a list of list for saving.
-            new_cache = [list(item) for item in new_cache_set]
+            new_cache = [list(new_item) for new_item in new_cache_set]
             self.projects_cache[project_key][:] = new_cache
         # save data to disk
         json_data = open(self.cache_path, 'w')
@@ -177,4 +177,6 @@ class CssStyleCompletionEvent(sublime_plugin.EventListener):
 
     def on_query_completions(self, view, prefix, locations):
         if cssStyleCompletion.at_html_attribute('class', view, locations):
+            return (cssStyleCompletion.returnClassCompletions(view), 0)
+        if view.match_selector(locations[0], 'meta.selector.css'):
             return (cssStyleCompletion.returnClassCompletions(view), 0)
