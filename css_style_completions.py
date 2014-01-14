@@ -1,8 +1,12 @@
-import sublime, sublime_plugin, os, json
+import sublime, sublime_plugin, os, json, re
 
 cssStyleCompletion = None
 cache_path = None
 ST2 = int(sublime.version()) < 3000
+symbol_dict = {
+    'class': 'entity.other.attribute-name.class.css',
+    'id': 'entity.other.attribute-name.id.css'
+}
 
 if ST2:
     cache_path = os.path.join(
@@ -44,6 +48,7 @@ class CssStyleCompletion():
             self.projects_cache = {}
 
     def _saveCache(self, view):
+        global symbol_dict
         file_key, project_key = self.getProjectKeysOfView(view)
         # if there is no project_key set the project_key as the file_key
         # so that we can cache on a per file basis
@@ -52,20 +57,33 @@ class CssStyleCompletion():
         # no cache yet
         if project_key not in self.projects_cache:
             # load up cache with all view files that are open and exit
-            self.projects_cache[project_key] = self._extractCssClasses(view)
+            self.projects_cache[project_key] = {}
+            for symbol in symbol_dict:
+                self.projects_cache[project_key][symbol] = self._extractSymbol(view, symbol)
 
         # lazily build cache per view save
         elif project_key in self.projects_cache:
             current_cache = self.projects_cache[project_key]
-            new_cache = self._extractCssClasses(view)
 
-            # the following products a list of tuples and list
-            new_cache += current_cache
-            # normalize list to be a list of tuples and remove duplicates
-            new_cache_set = set(tuple(item) for item in new_cache)
-            # now convert to a list of list for saving.
-            new_cache = [list(new_item) for new_item in new_cache_set]
-            self.projects_cache[project_key][:] = new_cache
+            # adding for backwards compatibility due this
+            # property being used as a list before, but now
+            # as a dict...
+            if isinstance(current_cache, list):
+                current_cache = {}
+
+            for symbol in symbol_dict:
+                new_cache = self._extractSymbol(view, symbol)
+
+                if not symbol in current_cache:
+                    current_cache[symbol] = []
+                # the following products a list of tuples and list
+                current_cache[symbol] += new_cache
+                # normalize list to be a list of tuples and remove duplicates
+                new_cache_set = set(tuple(item) for item in current_cache[symbol])
+                # now convert to a list of list for saving.
+                current_cache[symbol] = [list(new_item) for new_item in new_cache_set]
+
+            self.projects_cache[project_key] = current_cache
         # save data to disk
         json_data = open(self.cache_path, 'w')
         json_data.write(json.dumps(self.projects_cache))
@@ -91,36 +109,45 @@ class CssStyleCompletion():
         elif return_both and project_name:
             return (file_name, project_name)
 
-    def returnClassCompletions(self, view):
+    def returnSymbolCompletions(self, view, symbol_type):
+        global symbol_dict
+        if not symbol_type in symbol_dict:
+            return []
         file_key, project_key = self.getProjectKeysOfView(
             view,
             return_both=True
         )
         completion_list = []
 
-
-
         if file_key in self.projects_cache:
-            completion_list = self.projects_cache[file_key]
+            completion_list = self.projects_cache[file_key][symbol_type]
         if project_key in self.projects_cache:
-            completion_list = completion_list + self.projects_cache[project_key]
-
-
+            completion_list = completion_list + self.projects_cache[project_key][symbol_type]
         if completion_list:
-            return [ tuple(completions) for completions in completion_list]
+            return [
+                tuple(completions)
+                for completions in completion_list
+            ]
         else:
             # we have no cache so just return whats in the current view
-            return self._extractCssClasses(view)
+            return self._extractSymbol(view, symbol_dict[symbol_type])
 
-    def _extractCssClasses(self, view):
+    def _extractSymbol(self, view, symbol_type):
+        global symbol_dict
+
+        if not symbol_type in symbol_dict:
+            return []
+
         def genCompletionSet(symbols):
             return [(
                 symbol + "\t " + file_name, symbol
-            ) for symbol in symbols.split('.')[1:]]
+            # use the first char to split on (#|.)
+            ) for symbol in symbols.split(symbols[0])[1:]]
+
         # get filename with extension
         file_name = os.path.basename(view.file_name())
         # TODO: allow selectors to be modified by a setting file
-        symbols = view.find_by_selector('entity.other.attribute-name.class.css')
+        symbols = view.find_by_selector(symbol_dict[symbol_type])
         results = []
         for point in symbols:
             results.extend(genCompletionSet(view.substr(point)))
@@ -129,7 +156,7 @@ class CssStyleCompletion():
     def _returnViewCompletions(self, view):
         results = []
         for view in view.window().views():
-            results += self._extractCssClasses(view)
+            results += self._extractSymbol(view, 'class')
         return list(set(results))
 
     def at_html_attribute(self, attribute, view, locations):
@@ -139,14 +166,32 @@ class CssStyleCompletion():
         check_attribute = ''
         view_point = locations[0]
         char = ''
-        while(char != ' ' and view_point > -1):
-                char = view.substr(view_point)
-                if(char != ' '):
-                    check_attribute += char
-                view_point -= 1
+        selector_score = 1
+        while((char != ' ' or selector_score != 0) and view_point > -1):
+            char = view.substr(view_point)
+            selector_score = view.score_selector(view_point, 'string')
+            if(char != ' ' or selector_score != 0):
+                check_attribute += char
+            view_point -= 1
         check_attribute = check_attribute[::-1]
         if check_attribute.startswith(attribute):
                 return True
+        return False
+
+    def at_css_selector(self, css_selector, view, locations):
+        selector = view.match_selector(locations[0], 'meta.selector.css')
+        if not selector:
+            return False
+        check_attribute = ''
+        view_point = locations[0] - 1
+        char = ''
+        while(char != css_selector and not re.match(r'\n', char) and view_point > -1):
+            char = view.substr(view_point)
+            check_attribute += char
+            view_point -= 1
+        check_attribute = check_attribute[::-1]
+        if check_attribute.startswith(css_selector):
+            return True
         return False
 
 
@@ -177,6 +222,13 @@ class CssStyleCompletionEvent(sublime_plugin.EventListener):
 
     def on_query_completions(self, view, prefix, locations):
         if cssStyleCompletion.at_html_attribute('class', view, locations):
-            return (cssStyleCompletion.returnClassCompletions(view), 0)
-        if view.match_selector(locations[0], 'meta.selector.css'):
-            return (cssStyleCompletion.returnClassCompletions(view), 0)
+            return (cssStyleCompletion.returnSymbolCompletions(view, 'class'), 0)
+        if cssStyleCompletion.at_html_attribute('id', view, locations):
+            return (cssStyleCompletion.returnSymbolCompletions(view, 'id'), 0)
+
+        if cssStyleCompletion.at_css_selector('.', view, locations):
+            return (cssStyleCompletion.returnSymbolCompletions(view, 'class'), 0)
+        if cssStyleCompletion.at_css_selector('#', view, locations):
+            return (cssStyleCompletion.returnSymbolCompletions(view, 'id'), 0)
+
+        return None
