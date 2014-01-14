@@ -22,7 +22,7 @@ if not ST2:
         'CSS',
         'CSS.completions.cache'
     )
-
+cache_path = os.path.abspath(cache_path)
 cache_dir = cache_path.replace('CSS.completions.cache', '')
 
 if not os.path.exists(cache_dir):
@@ -36,7 +36,7 @@ def plugin_loaded():
 
 class CssStyleCompletion():
     def __init__(self, cache_path):
-        self.cache_path = os.path.abspath(cache_path)
+        self.cache_path = cache_path
         self._loadCache()
 
     def _loadCache(self):
