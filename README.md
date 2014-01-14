@@ -1,5 +1,7 @@
-CSS Class Completions
+CSS Extended Completions
 ===================
+
+###Sublime Text 2/3
 
 Lazy loads in CSS completions.
 
