@@ -47,6 +47,15 @@ class CssStyleCompletion():
         except:
             self.projects_cache = {}
 
+    def back_compat(self, cache_item):
+        # TODO: remove within the next few updates
+        # adding for backwards compatibility due this
+        # property being used as a list before, but now
+        # as a dict...
+        if isinstance(cache_item, list):
+            cache_item = {}
+        return cache_item
+
     def _saveCache(self, view):
         global symbol_dict
         file_key, project_key = self.getProjectKeysOfView(view)
@@ -65,11 +74,8 @@ class CssStyleCompletion():
         elif project_key in self.projects_cache:
             current_cache = self.projects_cache[project_key]
 
-            # adding for backwards compatibility due this
-            # property being used as a list before, but now
-            # as a dict...
-            if isinstance(current_cache, list):
-                current_cache = {}
+            # for backward compatibility
+            self.back_compat(current_cache)
 
             for symbol in symbol_dict:
                 new_cache = self._extractSymbol(view, symbol)
@@ -120,9 +126,15 @@ class CssStyleCompletion():
         completion_list = []
 
         if file_key in self.projects_cache:
-            completion_list = self.projects_cache[file_key][symbol_type]
+            # for backward compatibility
+            self.projects_cache[file_key] = self.back_compat(self.projects_cache[file_key])
+            if symbol_type in self.projects_cache[file_key]:
+                completion_list = self.projects_cache[file_key][symbol_type]
         if project_key in self.projects_cache:
-            completion_list = completion_list + self.projects_cache[project_key][symbol_type]
+            # for backward compatibility
+            self.projects_cache[project_key] = self.back_compat(self.projects_cache[project_key])
+            if symbol_type in self.projects_cache[project_key]:
+                completion_list = completion_list + self.projects_cache[project_key][symbol_type]
         if completion_list:
             return [
                 tuple(completions)
