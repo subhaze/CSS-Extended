@@ -6,8 +6,10 @@ common = {  "color": ["rgb($1)", "rgba($1)", "hsl($1)", "hsla($1)", "transparent
             "uri": ["url($1)"],
             "border-style": ["none", "hidden", "dotted", "dashed", "solid", "double", "groove", "ridge", "inset", "outset"],
             "border-width": ["thin", "medium", "thick"],
+            "box": ["border-box", "padding-box", "content-box"],
             "shape": ["rect($1)"],
-            "generic-family": ["serif", "sans-serif", "cursive", "fantasy", "monospace"] }
+            "generic-family": ["serif", "sans-serif", "cursive", "fantasy", "monospace"],
+            "family-name": ['Georgia', '"Palatino Linotype"', '"Book Antiqua"', 'Palatino', '"Times New Roman"', 'Times', 'Arial', 'Helvetica', '"Arial Black"', 'Gadget', 'Impact', 'Charcoal', '"Lucida Sans Unicode"', '"Lucida Grande"', 'Tahoma', 'Geneva', '"Trebuchet MS"', 'Verdana', 'Geneva', '"Courier New"', 'Courier', '"Lucida Console"', 'Monaco'] }
 
 css_data = """
 "background-attachment"=scroll | fixed | inherit
@@ -92,7 +94,7 @@ css_data = """
 
 "background-clip"=<box>
 "background-origin"=<box>
-"background-size"=<bg-size>
+"background-size"=auto | cover | contain | <percentage> | <length>
 "border"=<border-width> | <border-style> | <color>
 "border-color"=<color>
 "border-image"=<border-image-source> | <border-image-slice> | <border-image-width> | <border-image-width> | <border-image-outset> | <border-image-repeat>
@@ -111,7 +113,7 @@ css_data = """
 "border-width"=<border-width>
 "box-decoration-break"=slice | clone
 "box-shadow"=none | <shadow> | none
-"box-sizing"=border-box | padding-box
+"box-sizing"=<box>
 
 
 
@@ -155,20 +157,20 @@ css_data = """
 "hanging-punctuation"=none | first | force-end | allow-end | last
 
 "transition-property"=none | <single-transition-property>
-"transition-duration"=<time>
+"transition-duration"=<number>
 "transition-timing-function"=<single-transition-timing-function>
-"transition-delay"=<time>
+"transition-delay"=<number>
 "transition"=<single-transition>
 
-"animation-name"=<single-animation-name>
-"animation-duration"=<time>
-"animation-timing-function"=<single-timing-function>
-"animation-iteration-count"=<single-animation-iteration-count>
-"animation-direction"=<single-animation-direction>
-"animation-play-state"=<single-animation-play-state>
-"animation-delay"=<time>
-"animation-fill-mode"=<single-animation-fill-mode>
-"animation"=<single-animation>
+"animation-name"=none
+"animation-duration"=<number>
+"animation-timing-function"=ease | steps($1, start)$0 | steps($1, end)$0 | step-start | step-end | linear | ease-out | ease-in-out | ease-in | cubic-bezier($1, $2, $3, $4)$0
+"animation-iteration-count"=1 | infinite | <number>
+"animation-direction"=normal | reverse | alternate-reverse | alternate
+"animation-play-state"=running | paused
+"animation-delay"=<number>
+"animation-fill-mode"=none | forwards | both | backwards
+"animation"=<animation-duration> | <animation-timing-function> | <animation-delay> | <animation-iteration-count> | <animation-direction> | <animation-fill-mode> | <animation-play-state>
 
 "font-family"=<family-name> | <generic-family>
 "font-weight"=normal | bold | bolder | lighter | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900
