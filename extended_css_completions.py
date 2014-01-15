@@ -178,7 +178,7 @@ class CSSCompletions(sublime_plugin.EventListener):
 
                         l.append((desc, snippet))
 
-                    return (l, 0)
+                    return (l, sublime.INHIBIT_WORD_COMPLETIONS)
 
             return None
         else:
@@ -190,4 +190,4 @@ class CSSCompletions(sublime_plugin.EventListener):
                 else:
                     l.append((p, p))
 
-            return (l, 0)
+            return (l, sublime.INHIBIT_WORD_COMPLETIONS)
