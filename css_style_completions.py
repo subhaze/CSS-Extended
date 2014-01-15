@@ -7,6 +7,48 @@ symbol_dict = {
     'class': 'entity.other.attribute-name.class.css',
     'id': 'entity.other.attribute-name.id.css'
 }
+# TODO: eventually move this out into settings
+pseudo_selector_list = [
+    'after',   # should be element, but works with : currently
+    'before',  # see comment above
+    'checked',
+    'default',
+    'disabled',
+    'empty',
+    'enabled',
+    'first',
+    'first-child',
+    'first-letter',  # see comment above
+    'first-line',  # see comment above
+    'first-of-type',
+    'focus',
+    'fullscreen',
+    'hover',
+    'indeterminate',
+    'invalid',
+    'lang',
+    'last-child',
+    'last-of-type',
+    'left',
+    'link',
+    'not',
+    'nth-child',
+    'nth-last-child',
+    'nth-last-type-of',
+    'nth-type-of',
+    'only-child',
+    'only-type-of',
+    'optional',
+    'read-only',
+    'read-write',
+    'required',
+    'right',
+    'root',
+    'scope',
+    'target',
+    'valid',
+    'visited'
+]
 
 if ST2:
     cache_path = os.path.join(
@@ -114,6 +156,10 @@ class CssStyleCompletion():
             return (file_name, None)
         elif return_both and project_name:
             return (file_name, project_name)
+
+    def returnPseudoCompletions(self):
+        global pseudo_selector_list
+        return [(selector + '\t pseudo selector', selector) for selector in pseudo_selector_list]
 
     def returnSymbolCompletions(self, view, symbol_type):
         global symbol_dict
@@ -233,11 +279,18 @@ class CssStyleCompletionEvent(sublime_plugin.EventListener):
         cssStyleCompletion._saveCache(view)
 
     def on_query_completions(self, view, prefix, locations):
+        # inside HTML scope completions
         if cssStyleCompletion.at_html_attribute('class', view, locations):
             return (cssStyleCompletion.returnSymbolCompletions(view, 'class'), 0)
         if cssStyleCompletion.at_html_attribute('id', view, locations):
             return (cssStyleCompletion.returnSymbolCompletions(view, 'id'), 0)
 
+        # inside CSS scope pseudo completions
+        if cssStyleCompletion.at_css_selector(':', view, locations):
+            print('the prefix ', prefix)
+            return (cssStyleCompletion.returnPseudoCompletions(), 0)
+
+        # inside CSS scope symbol completions
         if cssStyleCompletion.at_css_selector('.', view, locations):
             return (cssStyleCompletion.returnSymbolCompletions(view, 'class'), 0)
         if cssStyleCompletion.at_css_selector('#', view, locations):
