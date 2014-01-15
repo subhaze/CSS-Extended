@@ -138,14 +138,17 @@ class CssStyleCompletion():
         json_data.close()
 
     def getProjectKeysOfView(self, view, return_both=False):
-        if ST2:
+        project_name = view.window().project_file_name()
+        if ST2 or not project_name:
+            # we could be ST3 but not in a true project
+            # so fall back to using current folders opened within ST
             project_name = '-'.join(view.window().folders())
-        else:
-            project_name = view.window().project_file_name()
+
         # TODO: make this extension list a setting
         css_extension = ('.css', '.less')
         file_extension = os.path.splitext(view.file_name())[1]
         file_name = view.file_name()
+
         # if we have a project and we're working in a stand alone style file
         # return the project file name as the key
         if file_extension in css_extension and project_name:
@@ -287,7 +290,6 @@ class CssStyleCompletionEvent(sublime_plugin.EventListener):
 
         # inside CSS scope pseudo completions
         if cssStyleCompletion.at_css_selector(':', view, locations):
-            print('the prefix ', prefix)
             return (cssStyleCompletion.returnPseudoCompletions(), 0)
 
         # inside CSS scope symbol completions
