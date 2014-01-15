@@ -29,7 +29,7 @@ common = {  "color": ["rgb($1)", "rgba($1)", "hsl($1)", "hsla($1)", "transparent
 
 css_data = """
 "font-family"=<family-name> | <generic-family>| inherit
-
+"display"=flex | inline-flex | compact | container | run-in
 "icon"=auto | <uri> | inherit
 "box-sizing"=content-box | padding-box | border-box | inherit
 "outline-offset"=<length> | inherit
@@ -40,7 +40,17 @@ css_data = """
 "nav-up" "nav-right" "nav-down" "nav-left"=auto | current | root | inherit
 "ime-mode"=auto | normal | active | inactive | disabled | inherit
 
-
+"flex-basis"=<percentage> | <number> | inherit | auto
+"flex-direction"=row | row-reverse | column | column-reverse | inherit
+"flex-flow"=<flex-direction> | <flex-wrap>
+"flex-grow"=<number> | inherit
+"flex-shrink"=<number> | inherit
+"flex-wrap"=nowrap | wrap | wrap-reverse | inherit
+"justify-content"=flex-start | flex-end | center | space-between | space-around
+"order"=<number> | inherit
+"align-content"=flex-start | flex-end | center | space-between | space-around | stretch | inherit
+"align-items"=flex-start | flex-end | center | baseline | stretch | inherit
+"align-self"=auto | flex-start | flex-end | center | baseline | stretch | inherit
 
 "transform"=none | <transform-list>
 "transform-origin"=left | center | right | top | bottom | <percentage> | <length>
@@ -65,6 +75,7 @@ css_data = """
 "text-indent"=<length> | <percentage> | hanging | each-line
 "hanging-punctuation"=none | first | force-end | allow-end | last
 
+"backface-visibility"=visible | hidden
 "transition-property"=none | <single-transition-property>
 "transition-duration"=<number>
 "transition-timing-function"=<single-transition-timing-function>
