@@ -1,0 +1,3 @@
+Update
+
+- Allow index caching in Sublime Text 3 even when you don't have a project file save.

@@ -1,0 +1,5 @@
+CSS Extended Completions
+
+Save any file you're working on to add it to the ID/class completions
+
+To delete your cache, open the command palette and type 'CSS delete cache'
