@@ -112,6 +112,7 @@ css_data = """
 "font-language-override"=normal | <string>
 """
 
+
 def parse_css_data(data):
     props = {}
     for l in data.splitlines():
@@ -177,7 +178,7 @@ class CSSCompletions(sublime_plugin.EventListener):
 
                         l.append((desc, snippet))
 
-                    return (l, sublime.INHIBIT_WORD_COMPLETIONS)
+                    return (l, 0)
 
             return None
         else:
@@ -189,4 +190,4 @@ class CSSCompletions(sublime_plugin.EventListener):
                 else:
                     l.append((p, p))
 
-            return (l, sublime.INHIBIT_WORD_COMPLETIONS)
+            return (l, 0)
