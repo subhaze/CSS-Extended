@@ -5,7 +5,8 @@ cache_path = None
 ST2 = int(sublime.version()) < 3000
 symbol_dict = {
     'class': 'entity.other.attribute-name.class.css',
-    'id': 'entity.other.attribute-name.id.css'
+    'id': 'entity.other.attribute-name.id.css',
+    'less_var': 'variable.other.less'
 }
 # TODO: eventually move this out into settings
 pseudo_selector_list = [
@@ -195,7 +196,6 @@ class CssStyleCompletion():
 
     def _extractSymbol(self, view, symbol_type):
         global symbol_dict
-
         if not symbol_type in symbol_dict:
             return []
 
@@ -239,19 +239,19 @@ class CssStyleCompletion():
                 return True
         return False
 
-    def at_css_selector(self, css_selector, view, locations):
-        selector = view.match_selector(locations[0], 'meta.selector.css')
+    def at_style_symbol(self, style_symbol, style_scope, view, locations):
+        selector = view.match_selector(locations[0], style_scope)
         if not selector:
             return False
         check_attribute = ''
         view_point = locations[0] - 1
         char = ''
-        while(char != css_selector and not re.match(r'\n', char) and view_point > -1):
+        while(char != style_symbol and not re.match(r'\n', char) and view_point > -1):
             char = view.substr(view_point)
             check_attribute += char
             view_point -= 1
         check_attribute = check_attribute[::-1]
-        if check_attribute.startswith(css_selector):
+        if check_attribute.startswith(style_symbol):
             return True
         return False
 
@@ -289,13 +289,24 @@ class CssStyleCompletionEvent(sublime_plugin.EventListener):
             return (cssStyleCompletion.returnSymbolCompletions(view, 'id'), 0)
 
         # inside CSS scope pseudo completions
-        if cssStyleCompletion.at_css_selector(':', view, locations):
+        if cssStyleCompletion.at_style_symbol(':', 'meta.selector.css', view, locations):
             return (cssStyleCompletion.returnPseudoCompletions(), 0)
 
         # inside CSS scope symbol completions
-        if cssStyleCompletion.at_css_selector('.', view, locations):
+        if cssStyleCompletion.at_style_symbol('.', 'meta.selector.css', view, locations):
             return (cssStyleCompletion.returnSymbolCompletions(view, 'class'), 0)
-        if cssStyleCompletion.at_css_selector('#', view, locations):
+        if cssStyleCompletion.at_style_symbol('#', 'meta.selector.css', view, locations):
             return (cssStyleCompletion.returnSymbolCompletions(view, 'id'), 0)
+
+        # inside LESS scope symbol completions
+        if cssStyleCompletion.at_style_symbol(
+            '@', 'source.less meta.property-value.css',
+            view, locations
+        ):
+            return (
+                cssStyleCompletion.returnSymbolCompletions(
+                    view, 'less_var'
+                ), sublime.INHIBIT_EXPLICIT_COMPLETIONS|sublime.INHIBIT_WORD_COMPLETIONS
+            )
 
         return None
