@@ -5,6 +5,8 @@ CSS Extended Completions
 
 Parses CSS completions on document save.
 
+![
+](https://dl.dropboxusercontent.com/u/4790638/images/css-extended-gif.gif)
 
 This package lazy parses CSS classes/IDs when you save a document that you're working on. If that document is a .css file (stand alone file) it will add any symbols that are found to the main project index.
 
