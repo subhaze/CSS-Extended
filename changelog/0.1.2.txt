@@ -1,0 +1,3 @@
+Bug Fix
+
+- Resolves regression in ST 2 where it could not properly cache symbols
