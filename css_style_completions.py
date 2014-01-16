@@ -138,7 +138,8 @@ class CssStyleCompletion():
         json_data.close()
 
     def getProjectKeysOfView(self, view, return_both=False):
-        project_name = view.window().project_file_name()
+        if not ST2:
+            project_name = view.window().project_file_name()
         if ST2 or not project_name:
             # we could be ST3 but not in a true project
             # so fall back to using current folders opened within ST
