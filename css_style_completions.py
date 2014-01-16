@@ -6,7 +6,8 @@ ST2 = int(sublime.version()) < 3000
 symbol_dict = {
     'class': 'entity.other.attribute-name.class.css',
     'id': 'entity.other.attribute-name.id.css',
-    'less_var': 'variable.other.less'
+    'less_var': 'variable.other.less',
+    'scss_var': 'variable.scss'
 }
 # TODO: eventually move this out into settings
 pseudo_selector_list = [
@@ -147,7 +148,7 @@ class CssStyleCompletion():
             project_name = '-'.join(view.window().folders())
 
         # TODO: make this extension list a setting
-        css_extension = ('.css', '.less')
+        css_extension = ('.css', '.less', '.scss')
         file_extension = os.path.splitext(view.file_name())[1]
         file_name = view.file_name()
 
@@ -307,7 +308,18 @@ class CssStyleCompletionEvent(sublime_plugin.EventListener):
             return (
                 cssStyleCompletion.returnSymbolCompletions(
                     view, 'less_var'
-                ), sublime.INHIBIT_EXPLICIT_COMPLETIONS|sublime.INHIBIT_WORD_COMPLETIONS
+                ), sublime.INHIBIT_EXPLICIT_COMPLETIONS | sublime.INHIBIT_WORD_COMPLETIONS
+            )
+
+        # inside SCSS scope symbol completions
+        if cssStyleCompletion.at_style_symbol(
+            '$', 'source.scss, meta.property-value.scss',
+            view, locations
+        ):
+            return (
+                cssStyleCompletion.returnSymbolCompletions(
+                    view, 'scss_var'
+                ), sublime.INHIBIT_EXPLICIT_COMPLETIONS | sublime.INHIBIT_WORD_COMPLETIONS
             )
 
         return None
