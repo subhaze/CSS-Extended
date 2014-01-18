@@ -305,7 +305,7 @@ class CssStyleCompletion():
         check_attribute = ''
         view_point = locations[0] - 1
         char = ''
-        while(char != style_symbol and not re.match(r'\n', char) and view_point > -1):
+        while(char != style_symbol and not re.match(r'[\n ]', char) and view_point > -1):
             char = view.substr(view_point)
             check_attribute += char
             view_point -= 1
@@ -359,7 +359,7 @@ class CssStyleCompletionEvent(sublime_plugin.EventListener):
 
         # inside LESS scope symbol completions
         if cssStyleCompletion.at_style_symbol(
-            '@', 'source.less meta.property-value.css',
+            '@', 'source.less',
             view, locations
         ):
             return (
