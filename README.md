@@ -5,8 +5,6 @@ CSS Extended Completions
 
 Parses CSS symbols on document save.
 
-![
-](https://dl.dropboxusercontent.com/u/4790638/images/css-extended-gif.gif)
 
 This package lazy parses CSS classes/IDs when you save a document that you're working on.
 
@@ -23,3 +21,21 @@ One other addition is the completion for pseudo selectors, after typing `:` you 
 
 
 You can delete the cache via the command palette `CSS Completions: Delete Cache`
+
+----
+####Pseudo Selector Completions
+
+![](https://dl.dropboxusercontent.com/u/4790638/images/ST-pseudo-selector.png)
+
+----
+#### Extended Property Value Completions
+
+![](https://dl.dropboxusercontent.com/u/4790638/images/ST-extended-css-property-values-2.png)
+
+----
+#### Class Completions Within Class Attribute
+![](https://dl.dropboxusercontent.com/u/4790638/images/ST-class-completion-in-class-attribute-2.png)
+
+----
+#### Class Completions Within CSS Scope
+![](https://dl.dropboxusercontent.com/u/4790638/images/ST-class-completion-in-css.png)
