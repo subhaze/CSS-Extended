@@ -22,6 +22,8 @@ One other addition is the completion for pseudo selectors, after typing `:` you 
 
 You can delete the cache via the command palette `CSS Completions: Delete Cache`
 
+
+### CSS Completion Examples
 ----
 ####Pseudo Selector Completions
 
@@ -39,3 +41,9 @@ You can delete the cache via the command palette `CSS Completions: Delete Cache`
 ----
 #### Class Completions Within CSS Scope
 ![](https://dl.dropboxusercontent.com/u/4790638/images/ST-class-completion-in-css.png)
+
+### LESS Completion Examples
+----
+####Mixin Completions, with Parametric Mixin Tab Order
+![](https://dl.dropboxusercontent.com/u/4790638/images/ST-LESS-mixin-completions.png)
+![](https://dl.dropboxusercontent.com/u/4790638/images/ST-LESS-mixin-completions-with-snippet-tabbing.png)
