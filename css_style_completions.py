@@ -3,12 +3,70 @@ import sublime, sublime_plugin, os, json, re
 cssStyleCompletion = None
 cache_path = None
 ST2 = int(sublime.version()) < 3000
+
+# Symbol completion commands
+
+
+def simpleCompletionSet(view, point, file_name):
+    symbols = view.substr(point)
+    return [(
+        symbol + "\t " + file_name, symbol
+        # use the first char to split on (#|.)
+    ) for symbol in symbols.split(symbols[0])[1:]]
+
+
+def lessMixinCompletionSet(view, region, file_name):
+    # pattern for splitting up parameters
+    re_split_params = re.compile(r',|;')
+    # pattern to determine if the mixin symbol
+    # is a definition or it's being called
+    end_region = view.find(r'(?<!\@)\{|(\)\s*;)', region.b)
+    # since we didn't find { assume it's a mixin being called
+    # and do not parse
+    if view.substr(end_region) != '{':
+        return None
+    # removes the leading .
+    symbol = view.substr(region)[1:]
+    # grabs everything from the beginning ( all the way to the {
+    symbol_snippet = view.substr(sublime.Region(region.b, end_region.a))
+    # make sure we remove any 'when' guards
+    symbol_snippet = symbol_snippet.split('when')[0].strip()
+    # removes the parenthesis so we can template the parameters
+    symbol_snippet = symbol_snippet[1:-1].strip()
+    # used for displaying in the completion list
+    mixin_params = re_split_params.split(symbol_snippet)
+    # used for actually executing the completion
+    mixin_params_completion = []
+    if symbol_snippet:
+        # if we have parameters
+        # builds out the snippet for easily tabbing through parameters
+        mixin_params_completion = [
+            # we should end up with a string like: ${1:paramName}
+            '${%s:%s}' % (indx + 1, val)
+            for indx, val in enumerate(mixin_params)
+        ]
+    symbol_snippet_completion = '(' + ', '.join(mixin_params_completion) + ')'
+    symbol_snippet = '(' + ', '.join(mixin_params) + ')'
+    result = [(
+        symbol + symbol_snippet + "\t " + file_name, symbol + symbol_snippet_completion + ';\n'
+    )]
+    return result
+
 symbol_dict = {
     'class': 'entity.other.attribute-name.class.css',
     'id': 'entity.other.attribute-name.id.css',
     'less_var': 'variable.other.less',
-    'scss_var': 'variable.scss'
+    'less_mixin': 'entity.other.less.mixin',
+    'scss_var': 'variable.scss',
+
+    # Define commands for each symbol type...
+    'class_command': simpleCompletionSet,
+    'id_command': simpleCompletionSet,
+    'less_var_command': simpleCompletionSet,
+    'less_mixin_command': lessMixinCompletionSet,
+    'scss_var_command': simpleCompletionSet
 }
+
 # TODO: eventually move this out into settings
 pseudo_selector_list = [
     'after',   # should be element, but works with : currently
@@ -112,6 +170,8 @@ class CssStyleCompletion():
             # load up cache with all view files that are open and exit
             self.projects_cache[project_key] = {}
             for symbol in symbol_dict:
+                if '_command' in symbol:
+                    continue
                 self.projects_cache[project_key][symbol] = self._extractSymbol(view, symbol)
 
         # lazily build cache per view save
@@ -122,6 +182,8 @@ class CssStyleCompletion():
             self.back_compat(current_cache)
 
             for symbol in symbol_dict:
+                if '_command' in symbol:
+                    continue
                 new_cache = self._extractSymbol(view, symbol)
 
                 if not symbol in current_cache:
@@ -201,19 +263,14 @@ class CssStyleCompletion():
         if not symbol_type in symbol_dict:
             return []
 
-        def genCompletionSet(symbols):
-            return [(
-                symbol + "\t " + file_name, symbol
-            # use the first char to split on (#|.)
-            ) for symbol in symbols.split(symbols[0])[1:]]
-
         # get filename with extension
         file_name = os.path.basename(view.file_name())
-        # TODO: allow selectors to be modified by a setting file
         symbols = view.find_by_selector(symbol_dict[symbol_type])
         results = []
         for point in symbols:
-            results.extend(genCompletionSet(view.substr(point)))
+            completion = symbol_dict[symbol_type+'_command'](view, point, file_name)
+            if completion is not None:
+                results.extend(completion)
         return list(set(results))
 
     def _returnViewCompletions(self, view):
@@ -286,19 +343,19 @@ class CssStyleCompletionEvent(sublime_plugin.EventListener):
     def on_query_completions(self, view, prefix, locations):
         # inside HTML scope completions
         if cssStyleCompletion.at_html_attribute('class', view, locations):
-            return (cssStyleCompletion.returnSymbolCompletions(view, 'class'), 0)
+            return (cssStyleCompletion.returnSymbolCompletions(view, 'class'), sublime.INHIBIT_WORD_COMPLETIONS)
         if cssStyleCompletion.at_html_attribute('id', view, locations):
-            return (cssStyleCompletion.returnSymbolCompletions(view, 'id'), 0)
+            return (cssStyleCompletion.returnSymbolCompletions(view, 'id'), sublime.INHIBIT_WORD_COMPLETIONS)
 
         # inside CSS scope pseudo completions
         if cssStyleCompletion.at_style_symbol(':', 'meta.selector.css', view, locations):
-            return (cssStyleCompletion.returnPseudoCompletions(), 0)
+            return (cssStyleCompletion.returnPseudoCompletions(), sublime.INHIBIT_WORD_COMPLETIONS)
 
         # inside CSS scope symbol completions
         if cssStyleCompletion.at_style_symbol('.', 'meta.selector.css', view, locations):
-            return (cssStyleCompletion.returnSymbolCompletions(view, 'class'), 0)
+            return (cssStyleCompletion.returnSymbolCompletions(view, 'class'), sublime.INHIBIT_WORD_COMPLETIONS)
         if cssStyleCompletion.at_style_symbol('#', 'meta.selector.css', view, locations):
-            return (cssStyleCompletion.returnSymbolCompletions(view, 'id'), 0)
+            return (cssStyleCompletion.returnSymbolCompletions(view, 'id'), sublime.INHIBIT_WORD_COMPLETIONS)
 
         # inside LESS scope symbol completions
         if cssStyleCompletion.at_style_symbol(
@@ -308,6 +365,16 @@ class CssStyleCompletionEvent(sublime_plugin.EventListener):
             return (
                 cssStyleCompletion.returnSymbolCompletions(
                     view, 'less_var'
+                ), sublime.INHIBIT_EXPLICIT_COMPLETIONS | sublime.INHIBIT_WORD_COMPLETIONS
+            )
+
+        if cssStyleCompletion.at_style_symbol(
+            '.', 'source.less',
+            view, locations
+        ):
+            return (
+                cssStyleCompletion.returnSymbolCompletions(
+                    view, 'less_mixin'
                 ), sublime.INHIBIT_EXPLICIT_COMPLETIONS | sublime.INHIBIT_WORD_COMPLETIONS
             )
 
