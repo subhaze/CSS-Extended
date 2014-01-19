@@ -39,7 +39,7 @@ def scssMixinCompletionSet(view, region, file_name):
     symbol_snippet_completion = '(' + ', '.join(mixin_params_completion) + ')'
     symbol_snippet = '(' + ', '.join(mixin_params) + ')'
     result = [(
-        symbol + symbol_snippet + "\t " + file_name, symbol + symbol_snippet_completion + ';\n'
+        symbol + symbol_snippet + "\t " + file_name, symbol + symbol_snippet_completion + ';'
     )]
     return result
 
@@ -77,12 +77,12 @@ def lessMixinCompletionSet(view, region, file_name):
     symbol_snippet_completion = '(' + ', '.join(mixin_params_completion) + ')'
     symbol_snippet = '(' + ', '.join(mixin_params) + ')'
     result = [(
-        symbol + symbol_snippet + "\t " + file_name, symbol + symbol_snippet_completion + ';\n'
+        symbol + symbol_snippet + "\t " + file_name, symbol + symbol_snippet_completion + ';'
     )]
     return result
 
 symbol_dict = {
-    'class': 'entity.other.attribute-name.class.css',
+    'class': 'entity.other.attribute-name.class.css - entity.other.less.mixin',
     'id': 'entity.other.attribute-name.id.css',
     'less_var': 'variable.other.less',
     'less_mixin': 'entity.other.less.mixin',
@@ -180,15 +180,6 @@ class CssStyleCompletion():
         except:
             self.projects_cache = {}
 
-    def back_compat(self, cache_item):
-        # TODO: remove within the next few updates
-        # adding for backwards compatibility due this
-        # property being used as a list before, but now
-        # as a dict...
-        if isinstance(cache_item, list):
-            cache_item = {}
-        return cache_item
-
     def _saveCache(self, view):
         global symbol_dict
         file_key, project_key = self.getProjectKeysOfView(view)
@@ -196,37 +187,24 @@ class CssStyleCompletion():
         # so that we can cache on a per file basis
         if not project_key:
             project_key = file_key
-        # no cache yet
-        if project_key not in self.projects_cache:
-            # load up cache with all view files that are open and exit
-            self.projects_cache[project_key] = {}
-            for symbol in symbol_dict:
-                if '_command' in symbol:
-                    continue
-                self.projects_cache[project_key][symbol] = self._extractSymbol(view, symbol)
+        if project_key in self.projects_cache:
+            cache = self.projects_cache[project_key]
+        else:
+            cache = {}
 
-        # lazily build cache per view save
-        elif project_key in self.projects_cache:
-            current_cache = self.projects_cache[project_key]
+        for symbol in symbol_dict:
+            if '_command' in symbol:
+                continue
+            if symbol not in cache:
+                cache[symbol] = {}
+            completions = self.get_view_completions(view, symbol)
+            if completions:
+                cache[symbol][file_key] = completions
+            elif not cache[symbol]:
+                cache.pop(symbol, None)
+        if cache:
+            self.projects_cache[project_key] = cache
 
-            # for backward compatibility
-            self.back_compat(current_cache)
-
-            for symbol in symbol_dict:
-                if '_command' in symbol:
-                    continue
-                new_cache = self._extractSymbol(view, symbol)
-
-                if not symbol in current_cache:
-                    current_cache[symbol] = []
-                # the following products a list of tuples and list
-                current_cache[symbol] += new_cache
-                # normalize list to be a list of tuples and remove duplicates
-                new_cache_set = set(tuple(item) for item in current_cache[symbol])
-                # now convert to a list of list for saving.
-                current_cache[symbol] = [list(new_item) for new_item in new_cache_set]
-
-            self.projects_cache[project_key] = current_cache
         # save data to disk
         json_data = open(self.cache_path, 'w')
         json_data.write(json.dumps(self.projects_cache))
@@ -271,15 +249,12 @@ class CssStyleCompletion():
         completion_list = []
 
         if file_key in self.projects_cache:
-            # for backward compatibility
-            self.projects_cache[file_key] = self.back_compat(self.projects_cache[file_key])
             if symbol_type in self.projects_cache[file_key]:
-                completion_list = self.projects_cache[file_key][symbol_type]
+                completion_list = self.projects_cache[file_key][symbol_type][file_key]
         if project_key in self.projects_cache:
-            # for backward compatibility
-            self.projects_cache[project_key] = self.back_compat(self.projects_cache[project_key])
             if symbol_type in self.projects_cache[project_key]:
-                completion_list = completion_list + self.projects_cache[project_key][symbol_type]
+                for file in self.projects_cache[project_key][symbol_type]:
+                    completion_list = completion_list + self.projects_cache[project_key][symbol_type][file]
         if completion_list:
             return [
                 tuple(completions)
@@ -287,9 +262,9 @@ class CssStyleCompletion():
             ]
         else:
             # we have no cache so just return whats in the current view
-            return self._extractSymbol(view, symbol_dict[symbol_type])
+            return self.get_view_completions(view, symbol_dict[symbol_type])
 
-    def _extractSymbol(self, view, symbol_type):
+    def get_view_completions(self, view, symbol_type):
         global symbol_dict
         if not symbol_type in symbol_dict:
             return []
@@ -307,7 +282,7 @@ class CssStyleCompletion():
     def _returnViewCompletions(self, view):
         results = []
         for view in view.window().views():
-            results += self._extractSymbol(view, 'class')
+            results += self.get_view_completions(view, 'class')
         return list(set(results))
 
     def at_html_attribute(self, attribute, view, locations):
