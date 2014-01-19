@@ -15,6 +15,35 @@ def simpleCompletionSet(view, point, file_name):
     ) for symbol in symbols.split(symbols[0])[1:]]
 
 
+def scssMixinCompletionSet(view, region, file_name):
+    # pattern for splitting up parameters
+    re_split_params = re.compile(r',')
+    end_region = view.find(r'\{', region.b)
+    symbol = view.substr(region)
+    symbol_snippet = view.substr(sublime.Region(region.b,end_region.a)).strip()
+    # removes the parenthesis so we can template the parameters
+    symbol_snippet = symbol_snippet[1:-1].strip()
+    # used for displaying in the completion list
+    mixin_params = re_split_params.split(symbol_snippet)
+    # used for executing the completion
+    mixin_params_completion = []
+    if symbol_snippet:
+        # if we have parameters
+        # builds out the snippet for easily tabbing through parameters
+        mixin_params_completion = [
+            # we should end up with a string like: ${1:paramName}
+            # make sure we also escape the '$' so completions expand properly
+            '${%s:%s}' % (indx + 1, val.replace('$', '\\$'))
+            for indx, val in enumerate(mixin_params)
+        ]
+    symbol_snippet_completion = '(' + ', '.join(mixin_params_completion) + ')'
+    symbol_snippet = '(' + ', '.join(mixin_params) + ')'
+    result = [(
+        symbol + symbol_snippet + "\t " + file_name, symbol + symbol_snippet_completion + ';\n'
+    )]
+    return result
+
+
 def lessMixinCompletionSet(view, region, file_name):
     # pattern for splitting up parameters
     re_split_params = re.compile(r',|;')
@@ -35,7 +64,7 @@ def lessMixinCompletionSet(view, region, file_name):
     symbol_snippet = symbol_snippet[1:-1].strip()
     # used for displaying in the completion list
     mixin_params = re_split_params.split(symbol_snippet)
-    # used for actually executing the completion
+    # used for executing the completion
     mixin_params_completion = []
     if symbol_snippet:
         # if we have parameters
@@ -58,13 +87,15 @@ symbol_dict = {
     'less_var': 'variable.other.less',
     'less_mixin': 'entity.other.less.mixin',
     'scss_var': 'variable.scss',
+    'scss_mixin': 'meta.at-rule.mixin.scss entity.name.function.scss',
 
     # Define commands for each symbol type...
     'class_command': simpleCompletionSet,
     'id_command': simpleCompletionSet,
     'less_var_command': simpleCompletionSet,
     'less_mixin_command': lessMixinCompletionSet,
-    'scss_var_command': simpleCompletionSet
+    'scss_var_command': simpleCompletionSet,
+    'scss_mixin_command': scssMixinCompletionSet
 }
 
 # TODO: eventually move this out into settings
@@ -386,6 +417,16 @@ class CssStyleCompletionEvent(sublime_plugin.EventListener):
             return (
                 cssStyleCompletion.returnSymbolCompletions(
                     view, 'scss_var'
+                ), sublime.INHIBIT_EXPLICIT_COMPLETIONS | sublime.INHIBIT_WORD_COMPLETIONS
+            )
+
+        if view.match_selector(
+            locations[0],
+            'meta.property-list.scss meta.at-rule.include.scss'
+        ):
+            return (
+                cssStyleCompletion.returnSymbolCompletions(
+                    view , 'scss_mixin'
                 ), sublime.INHIBIT_EXPLICIT_COMPLETIONS | sublime.INHIBIT_WORD_COMPLETIONS
             )
 
