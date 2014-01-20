@@ -8,11 +8,12 @@ ST2 = int(sublime.version()) < 3000
 
 
 def simpleCompletionSet(view, point, file_name):
-    symbols = view.substr(point)
-    return [(
+    symbols = view.substr(point).strip()
+    completion = [(
         symbol + "\t " + file_name, symbol
         # use the first char to split on (#|.)
     ) for symbol in symbols.split(symbols[0])[1:]]
+    return completion
 
 
 def scssMixinCompletionSet(view, region, file_name):
