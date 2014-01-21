@@ -1,0 +1,8 @@
+Bug fixes
+- Remove styles cached from file that are no longer present
+
+Updates
+- LESS variable completions
+- LESS mixin completions
+- SCSS variable completions
+- SCSS mixin completions
