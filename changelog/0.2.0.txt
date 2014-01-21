@@ -1,3 +1,7 @@
+*NOTICE*
+With this update you should delete the current cache you have.
+To do this, run the command 'CSS Completions: Delete Cache' within the command palette
+
 Bug fixes
 - Remove styles cached from file that are no longer present
 
