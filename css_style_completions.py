@@ -4,8 +4,6 @@ cssStyleCompletion = None
 cache_path = None
 ST2 = int(sublime.version()) < 3000
 
-# Symbol completion commands
-
 
 def simpleCompletionSet(view, point, file_name):
     symbols = view.substr(point).strip()
