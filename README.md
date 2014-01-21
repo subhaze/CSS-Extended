@@ -47,3 +47,10 @@ You can delete the cache via the command palette `CSS Completions: Delete Cache`
 ####Mixin Completions, with Parametric Mixin Tab Order
 ![](https://dl.dropboxusercontent.com/u/4790638/images/ST-LESS-mixin-completions.png)
 ![](https://dl.dropboxusercontent.com/u/4790638/images/ST-LESS-mixin-completions-with-snippet-tabbing.png)
+
+### SCSS Completion Examples
+----
+####Mixin Completions, with Parametric Mixin Tab Order
+![](https://dl.dropboxusercontent.com/u/4790638/images/ST-SCSS-mixin-completions.png)
+![](https://dl.dropboxusercontent.com/u/4790638/images/ST-SCSS-mixin-completions-with-snippet-tabbing.png)
+
