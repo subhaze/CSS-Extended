@@ -1,5 +1,14 @@
 CSS Extended Completions
 
-Save any file you're working on to add it to the ID/class completions
+Save any file you're working on to add its CSS/LESS/SCSS symbols to the completion index.
+
+The following completions are provided:
+
+- Extended CSS property/values
+- CSS class names
+- CSS IDs
+- LESS variables/mixins/classes
+- SCSS variables/mixins/classes
+
 
 To delete your cache, open the command palette and type 'CSS delete cache'
