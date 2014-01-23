@@ -29,6 +29,17 @@ property/value completions such as `box-sizing`, additional font names for `font
 
 You can delete the cache via the command palette `CSS Completions: Delete Cache`
 
+### [Emmet](http://emmet.io) Support
+
+Emmet support is enabled by default, you just need to add the following to your User Settings:
+
+```json
+"auto_complete_selector": "source - comment, meta.tag - punctuation.definition.tag.begin, text.html.basic"
+```
+
+Don't have Emmet? No problem, you won't have any problems with it being enable by default.  
+Still want to disable Emmet support? Just set `"use_emmet": false` in the user's package settings
+
 ### CSS Completion Examples
 ----
 ####Pseudo Selector Completions

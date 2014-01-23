@@ -97,48 +97,7 @@ symbol_dict = {
     'scss_mixin_command': scssMixinCompletionSet
 }
 
-# TODO: eventually move this out into settings
-pseudo_selector_list = [
-    'after',   # should be element, but works with : currently
-    'before',  # see comment above
-    'checked',
-    'default',
-    'disabled',
-    'empty',
-    'enabled',
-    'first',
-    'first-child',
-    'first-letter',  # see comment above
-    'first-line',  # see comment above
-    'first-of-type',
-    'focus',
-    'fullscreen',
-    'hover',
-    'indeterminate',
-    'invalid',
-    'lang',
-    'last-child',
-    'last-of-type',
-    'left',
-    'link',
-    'not',
-    'nth-child',
-    'nth-last-child',
-    'nth-last-type-of',
-    'nth-type-of',
-    'only-child',
-    'only-type-of',
-    'optional',
-    'read-only',
-    'read-write',
-    'required',
-    'right',
-    'root',
-    'scope',
-    'target',
-    'valid',
-    'visited'
-]
+pseudo_selector_list = []
 
 if ST2:
     cache_path = os.path.join(
@@ -162,9 +121,11 @@ if not os.path.exists(cache_dir):
 
 
 def plugin_loaded():
-    global cssStyleCompletion, cache_path
+    global cssStyleCompletion, cache_path, settings
     cssStyleCompletion = CssStyleCompletion(cache_path)
 
+    settings = sublime.load_settings('css_style_completions.sublime-settings')
+    pseudo_selector_list = settings.get("pseudo_selector_list");
 
 class CssStyleCompletion():
     def __init__(self, cache_path):
@@ -217,8 +178,7 @@ class CssStyleCompletion():
             # so fall back to using current folders opened within ST
             project_name = '-'.join(view.window().folders())
 
-        # TODO: make this extension list a setting
-        css_extension = ('.css', '.less', '.scss')
+        css_extension = settings.get("css_extension")
         file_extension = os.path.splitext(view.file_name())[1]
         file_name = view.file_name()
 
@@ -285,7 +245,7 @@ class CssStyleCompletion():
         return list(set(results))
 
     def at_html_attribute(self, attribute, view, locations):
-        selector = view.match_selector(locations[0], 'text.html string')
+        selector = view.match_selector(locations[0], settings.get("html_attribute_scope"))
         if not selector:
             return False
         check_attribute = ''
@@ -352,14 +312,21 @@ class CssStyleCompletionEvent(sublime_plugin.EventListener):
         if cssStyleCompletion.at_html_attribute('id', view, locations):
             return (cssStyleCompletion.returnSymbolCompletions(view, 'id'), sublime.INHIBIT_WORD_COMPLETIONS)
 
+        # inside HTML with Emmet completions
+        if settings.get("use_emmet"):
+            if cssStyleCompletion.at_style_symbol('.', settings.get("emmet_scope"), view, locations):
+                return (cssStyleCompletion.returnSymbolCompletions(view, 'class'), sublime.INHIBIT_WORD_COMPLETIONS)
+            if cssStyleCompletion.at_style_symbol('#', settings.get("emmet_scope"), view, locations):
+                return (cssStyleCompletion.returnSymbolCompletions(view, 'id'), sublime.INHIBIT_WORD_COMPLETIONS)
+
         # inside CSS scope pseudo completions
-        if cssStyleCompletion.at_style_symbol(':', 'meta.selector.css', view, locations):
+        if cssStyleCompletion.at_style_symbol(':', settings.get("css_completion_scope"), view, locations):
             return (cssStyleCompletion.returnPseudoCompletions(), sublime.INHIBIT_WORD_COMPLETIONS)
 
         # inside CSS scope symbol completions
-        if cssStyleCompletion.at_style_symbol('.', 'meta.selector.css', view, locations):
+        if cssStyleCompletion.at_style_symbol('.', settings.get("css_completion_scope"), view, locations):
             return (cssStyleCompletion.returnSymbolCompletions(view, 'class'), sublime.INHIBIT_WORD_COMPLETIONS)
-        if cssStyleCompletion.at_style_symbol('#', 'meta.selector.css', view, locations):
+        if cssStyleCompletion.at_style_symbol('#', settings.get("css_completion_scope"), view, locations):
             return (cssStyleCompletion.returnSymbolCompletions(view, 'id'), sublime.INHIBIT_WORD_COMPLETIONS)
 
         # inside LESS scope symbol completions
