@@ -1,5 +1,6 @@
 {
 	"css_cache_include": [],
+	"save_cache_to_file": true,
 	"css_completion_scope": "meta.selector.css",
 	"html_attribute_scope": "string.quoted.double.html, string.quoted.single.html",
 	"use_emmet": true,

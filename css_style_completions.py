@@ -137,7 +137,7 @@ class CssStyleCompletion():
             self.projects_cache = {}
 
     def _saveCache(self, view):
-        global symbol_dict
+        global symbol_dict, settings
         file_key, project_key = self.getProjectKeysOfView(view)
         # if there is no project_key set the project_key as the file_key
         # so that we can cache on a per file basis
@@ -161,10 +161,11 @@ class CssStyleCompletion():
         if cache:
             self.projects_cache[project_key] = cache
 
-        # save data to disk
-        json_data = open(self.cache_path, 'w')
-        json_data.write(json.dumps(self.projects_cache))
-        json_data.close()
+        if settings.get('save_cache_to_file'):
+            # save data to disk
+            json_data = open(self.cache_path, 'w')
+            json_data.write(json.dumps(self.projects_cache))
+            json_data.close()
 
     def getProjectKeysOfView(self, view, return_both=False):
         if view.is_scratch():
