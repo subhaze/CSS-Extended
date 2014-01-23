@@ -1,5 +1,7 @@
 {
-	"css_cache_include": [],
+	// List of folders that you want to include for completion results.
+	// Only .css/.less/.scss files will be parsed within them.
+	"load_external_files": [],
 	"save_cache_to_file": true,
 	"css_completion_scope": "meta.selector.css",
 	"html_attribute_scope": "string.quoted.double.html, string.quoted.single.html",

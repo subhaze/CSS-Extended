@@ -12,6 +12,7 @@ cssStyleCompletion = None
 cache_path = None
 pseudo_selector_list = []
 scratch_view = None
+settings = {}
 
 symbol_dict = {
     'class': 'entity.other.attribute-name.class.css - entity.other.less.mixin',
@@ -62,15 +63,15 @@ def plugin_loaded():
 
     settings = sublime.load_settings('css_style_completions.sublime-settings')
     pseudo_selector_list = settings.get("pseudo_selector_list")
-
     load_external_files()
 
 
 def get_external_files():
     import glob
+    global settings
 
     external_files = []
-    for file_path in settings.get('css_cache_include'):
+    for file_path in settings.get('load_external_files'):
         external_files.extend(glob.glob(file_path))
     return external_files
 
@@ -348,7 +349,7 @@ class CssStyleCompletionEvent(sublime_plugin.EventListener):
             )
 
         if cssStyleCompletion.at_style_symbol(
-            '.', 'source.less',
+            '.', 'source.less - parameter.less',
             view, locations
         ):
             return (
@@ -370,7 +371,7 @@ class CssStyleCompletionEvent(sublime_plugin.EventListener):
 
         if view.match_selector(
             locations[0],
-            'meta.property-list.scss meta.at-rule.include.scss'
+            'meta.property-list.scss meta.at-rule.include.scss - punctuation.section.function.scss'
         ):
             return (
                 cssStyleCompletion.returnSymbolCompletions(
