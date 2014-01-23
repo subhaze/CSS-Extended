@@ -56,7 +56,7 @@ def plugin_loaded():
     cssStyleCompletion = CssStyleCompletion(cache_path)
 
     settings = sublime.load_settings('css_style_completions.sublime-settings')
-    pseudo_selector_list = settings.get("pseudo_selector_list");
+    pseudo_selector_list = settings.get("pseudo_selector_list")
 
 class CssStyleCompletion():
     def __init__(self, cache_path):
