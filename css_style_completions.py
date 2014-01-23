@@ -52,7 +52,7 @@ if not os.path.exists(cache_dir):
 
 
 def plugin_loaded():
-    global cssStyleCompletion, cache_path, settings
+    global cssStyleCompletion, cache_path, settings, pseudo_selector_list
     cssStyleCompletion = CssStyleCompletion(cache_path)
 
     settings = sublime.load_settings('css_style_completions.sublime-settings')
