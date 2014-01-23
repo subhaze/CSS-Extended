@@ -10,6 +10,8 @@ else:
 
 cssStyleCompletion = None
 cache_path = None
+pseudo_selector_list = []
+scratch_view = None
 
 symbol_dict = {
     'class': 'entity.other.attribute-name.class.css - entity.other.less.mixin',
@@ -28,8 +30,6 @@ symbol_dict = {
     'scss_mixin_command': scssMixinCompletionSet
 }
 
-pseudo_selector_list = []
-
 if ST2:
     cache_path = os.path.join(
         sublime.packages_path(),
@@ -38,12 +38,14 @@ if ST2:
         'CSS',
         'CSS.completions.cache'
     )
+
 if not ST2:
     cache_path = os.path.join(
         sublime.cache_path(),
         'CSS',
         'CSS.completions.cache'
     )
+
 cache_path = os.path.abspath(cache_path)
 cache_dir = cache_path.replace('CSS.completions.cache', '')
 
@@ -52,11 +54,74 @@ if not os.path.exists(cache_dir):
 
 
 def plugin_loaded():
-    global cssStyleCompletion, cache_path, settings, pseudo_selector_list
+    # TODO: Getting too many globals...
+    global cssStyleCompletion, cache_path
+    global settings, pseudo_selector_list
+
     cssStyleCompletion = CssStyleCompletion(cache_path)
 
     settings = sublime.load_settings('css_style_completions.sublime-settings')
     pseudo_selector_list = settings.get("pseudo_selector_list")
+
+    load_external_files()
+
+
+def get_external_files():
+    import glob
+
+    external_files = []
+    for file_path in settings.get('css_cache_include'):
+        external_files.extend(glob.glob(file_path))
+    return external_files
+
+
+def load_external_files():
+    global scratch_view
+
+    syntax_file = {
+        'css': 'Packages/CSS/CSS.tmLanguage',
+        'less': 'Packages/LESS/LESS.tmLanguage',
+        'scss': 'Packages/SCSS/Syntaxes/SCSS.tmLanguage'
+    }
+
+    scratch_view = create_output_panel('CSS Extended Completions')
+    scratch_view.set_scratch(True)
+    for file_path in get_external_files():
+        if not os.path.isfile(file_path):
+            return
+        file_extension = os.path.splitext(file_path)[1][1:]
+        if not file_extension in syntax_file:
+            return
+        scratch_view.set_syntax_file(syntax_file[file_extension])
+        try:
+            scratch_view.set_name(file_path)
+            with open(file_path, 'r') as f:
+                sublime.active_window().run_command(
+                    'css_extended_completions_file',
+                    {"content": f.read()}
+                )
+                cssStyleCompletion._saveCache(scratch_view)
+        except IOError:
+            pass
+
+
+class CssExtendedCompletionsFileCommand(sublime_plugin.TextCommand):
+        global scratch_view
+
+        def run(self, edit, content):
+                scratch_view.erase(edit, sublime.Region(0,scratch_view.size()))
+                scratch_view.insert(edit, 0, content)
+
+
+def create_output_panel(name):
+    '''
+        Used for loading in files outside of project view
+    '''
+    if ST2:
+        return sublime.active_window().get_output_panel(name)
+    else:
+        return sublime.active_window().create_output_panel(name)
+
 
 class CssStyleCompletion():
     def __init__(self, cache_path):
@@ -102,16 +167,24 @@ class CssStyleCompletion():
         json_data.close()
 
     def getProjectKeysOfView(self, view, return_both=False):
+        if view.is_scratch():
+            project_name = view.name()
         if not ST2:
-            project_name = view.window().project_file_name()
+            project_name = sublime.active_window().project_file_name()
         if ST2 or not project_name:
             # we could be ST3 but not in a true project
             # so fall back to using current folders opened within ST
-            project_name = '-'.join(view.window().folders())
+            project_name = '-'.join(sublime.active_window().folders())
 
         css_extension = settings.get("css_extension")
-        file_extension = os.path.splitext(view.file_name())[1]
-        file_name = view.file_name()
+        try:
+            file_extension = os.path.splitext(view.file_name())[1]
+        except:
+            file_extension = os.path.splitext(view.name())[1]
+        if view.is_scratch():
+            file_name = view.name()
+        else:
+            file_name = view.file_name()
 
         # if we have a project and we're working in a stand alone style file
         # return the project file name as the key
@@ -129,7 +202,7 @@ class CssStyleCompletion():
         return [(selector + '\t pseudo selector', selector) for selector in pseudo_selector_list]
 
     def returnSymbolCompletions(self, view, symbol_type):
-        global symbol_dict
+        global symbol_dict, settings
         if not symbol_type in symbol_dict:
             return []
         file_key, project_key = self.getProjectKeysOfView(
@@ -138,9 +211,12 @@ class CssStyleCompletion():
         )
         completion_list = []
 
+        for file in get_external_files():
+            if file in self.projects_cache:
+                completion_list = completion_list + self.projects_cache[file][symbol_type][file]
         if file_key in self.projects_cache:
             if symbol_type in self.projects_cache[file_key]:
-                completion_list = self.projects_cache[file_key][symbol_type][file_key]
+                completion_list = completion_list + self.projects_cache[file_key][symbol_type][file_key]
         if project_key in self.projects_cache:
             if symbol_type in self.projects_cache[project_key]:
                 for file in self.projects_cache[project_key][symbol_type]:
@@ -160,7 +236,10 @@ class CssStyleCompletion():
             return []
 
         # get filename with extension
-        file_name = os.path.basename(view.file_name())
+        try:
+            file_name = os.path.basename(view.file_name())
+        except:
+            file_name = os.path.basename(view.name())
         symbols = view.find_by_selector(symbol_dict[symbol_type])
         results = []
         for point in symbols:
@@ -171,7 +250,7 @@ class CssStyleCompletion():
 
     def _returnViewCompletions(self, view):
         results = []
-        for view in view.window().views():
+        for view in sublime.active_window().views():
             results += self.get_view_completions(view, 'class')
         return list(set(results))
 
