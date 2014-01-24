@@ -3,27 +3,20 @@ CSS Extended Completions
 
 ###Sublime Text 2/3
 
-✓	Extended property/value CSS completions
-
-✓	Class completions
-
-✓	ID completions
-
-✓	pseudo selector completions
-
-✓	LESS variable completions
-
-✓	LESS mixin completions
-
-✓	SCSS variable completions
-
-✓	SCSS mixin completions
+####Completion Cache
 
 Caches completions on document save.
 
 * If the document is a .css file (stand alone file) it will add any symbols that are found to the main project index.
 
-* If the document is a .html/.php it will parse that file and extract any classes/IDs found within style tags and only show you those completions, plus any from the main project cache.
+* If the document is a .html/.php/etc... it will parse that file and extract any classes/IDs found within style tags and only show you those completions within that file, plus any from the main project cache.
+
+######Loading External Styles
+
+You can eager load files from folders outside of your project via `load_external_files` setting. Provide an absolute path to any folder and the plugin will load in all css/less/scss files found within it.
+
+
+####Property/Value Completions
 
 property/value completions such as `box-sizing`, additional font names for `font-family`, `animation`, `flex-box`, etc...
 
