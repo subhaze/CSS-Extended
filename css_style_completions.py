@@ -63,7 +63,10 @@ def plugin_loaded():
 
     settings = sublime.load_settings('css_style_completions.sublime-settings')
     pseudo_selector_list = settings.get("pseudo_selector_list")
-    load_external_files()
+    delay_time = 0
+    if ST2:
+        delay_time = 1500
+    sublime.set_timeout(lambda: load_external_files(), delay_time)
 
 
 def get_external_files():
