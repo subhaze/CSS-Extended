@@ -17,7 +17,9 @@ Caches completions on document save.
 
 ####Loading External Files
 
-You can eager load files from folders outside of your project via `load_external_files` setting. Provide an absolute path to any folder and the plugin will load in all css/less/scss files found within it.
+You can eager load files from folders outside of your project via `load_external_files` setting.
+
+Example: `"load_external_files": ["/abs/path/to/css/*.css", "/abs/path/to/less/*.less]`
 
 ----
 
