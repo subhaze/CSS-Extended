@@ -1,0 +1,5 @@
+Bug Fixes
+- Fixes an issue in ST 3 when parsing some LESS files.
+
+Enhancements
+- Adds Side Bar menu item to easily add folders to index and cache within projects
