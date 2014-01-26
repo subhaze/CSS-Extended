@@ -44,7 +44,7 @@ def lessMixinCompletionSet(view, region, file_name):
     re_split_params = re.compile(r',|;')
     # pattern to determine if the mixin symbol
     # is a definition or it's being called
-    end_region = view.find(r'(?<!\@)\{|(\)\s*;)', region.b)
+    end_region = view.find(r'(?<!\@)\{|(\)\s*\}|(\)\s*;))', region.b)
     # since we didn't find { assume it's a mixin being called
     # and do not parse
     if view.substr(end_region) != '{':

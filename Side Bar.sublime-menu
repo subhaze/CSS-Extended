@@ -1,0 +1,34 @@
+[
+	{"caption":"-", "id":"css-extended-completions"},
+	{
+		"caption": "CSS Extended Completions",
+		"id": "css-extended-completions-parent",
+		"args": {"paths": []},
+		"children":[
+			{
+				"caption": "Add CSS Files To Cache",
+				"id": "css-extended-completions-add-css-to-cache",
+				"command": "add_to_cache",
+				"args": {"paths": [], "file_type": "*.css"}
+			},
+			{
+				"caption": "Add LESS Files To Cache",
+				"id": "css-extended-completions-add-less-to-cache",
+				"command": "add_to_cache",
+				"args": {"paths": [], "file_type": "*.less"}
+			},
+			{
+				"caption": "Add SCSS Files To Cache",
+				"id": "css-extended-completions-add-scss-to-cache",
+				"command": "add_to_cache",
+				"args": {"paths": [], "file_type": "*.scss"}
+			},
+			{
+				"caption": "Add All File Types To Cache",
+				"id": "css-extended-completions-add-scss-to-cache",
+				"command": "add_to_cache",
+				"args": {"paths": [], "file_type": "*.*"}
+			}
+		]
+	}
+]

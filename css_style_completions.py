@@ -63,7 +63,14 @@ def plugin_loaded():
 
     settings = sublime.load_settings('css_style_completions.sublime-settings')
     pseudo_selector_list = settings.get("pseudo_selector_list")
-    load_external_files()
+
+    def init_file_loading():
+        if not sublime.active_window():
+            sublime.set_timeout(lambda: init_file_loading(), 500)
+        else:
+            load_external_files(get_external_files())
+
+    init_file_loading()
 
 
 def get_external_files():
@@ -71,29 +78,42 @@ def get_external_files():
     global settings
 
     external_files = []
-    for file_path in settings.get('load_external_files'):
+    for file_path in settings.get('load_external_files', []):
         external_files.extend(glob.glob(file_path))
     return external_files
 
 
-def load_external_files():
+def load_external_files(file_list, as_scratch=True):
+    import time
     global scratch_view
-
     syntax_file = {
         'css': 'Packages/CSS/CSS.tmLanguage',
         'less': 'Packages/LESS/LESS.tmLanguage',
-        'scss': 'Packages/SCSS/Syntaxes/SCSS.tmLanguage'
+        'scss': 'Packages/SCSS/SCSS.tmLanguage'
     }
 
     scratch_view = create_output_panel('CSS Extended Completions')
-    scratch_view.set_scratch(True)
-    for file_path in get_external_files():
-        if not os.path.isfile(file_path):
-            return
+    scratch_view.set_scratch(as_scratch)
+    # sort file list by extension to reduce the frequency
+    # of syntax file loads
+    sorted(file_list, key=lambda x: x.split(".")[-1])
+    current_syntax = {
+        'isThis': ''
+    }
+    file_count = len(file_list)
+
+    def parse_file(file_path, indx):
+        global scratch_view
+        print('PARSING FILE', file_path)
         file_extension = os.path.splitext(file_path)[1][1:]
         if not file_extension in syntax_file:
             return
-        scratch_view.set_syntax_file(syntax_file[file_extension])
+        if not syntax_file[file_extension] == current_syntax['isThis']:
+            scratch_view.set_syntax_file(syntax_file[file_extension])
+            current_syntax['isThis'] = syntax_file[file_extension]
+        sublime.status_message(
+            'CSS Extended: parsing file %s of %s' % (indx, file_count)
+        )
         try:
             scratch_view.set_name(file_path)
             with open(file_path, 'r') as f:
@@ -105,13 +125,26 @@ def load_external_files():
         except IOError:
             pass
 
+    parse_delay = 0
+    for indx, file_path in enumerate(file_list):
+        if not os.path.isfile(file_path):
+            continue
+        sublime.set_timeout(
+            lambda file_path=file_path, indx=indx: parse_file(file_path, indx),
+            parse_delay
+        )
+        parse_delay = parse_delay + 250
+
 
 class CssExtendedCompletionsFileCommand(sublime_plugin.TextCommand):
         global scratch_view
 
         def run(self, edit, content):
-                scratch_view.erase(edit, sublime.Region(0,scratch_view.size()))
-                scratch_view.insert(edit, 0, content)
+            # add space between any )} chars
+            # ST3 throws an error in some LESS files that do this
+            content = re.sub(r'\)\}', r') }', content)
+            scratch_view.erase(edit, sublime.Region(0, scratch_view.size()))
+            scratch_view.insert(edit, 0, content)
 
 
 def create_output_panel(name):
@@ -161,7 +194,6 @@ class CssStyleCompletion():
                 cache.pop(symbol, None)
         if cache:
             self.projects_cache[project_key] = cache
-
         if settings.get('save_cache_to_file'):
             # save data to disk
             json_data = open(self.cache_path, 'w')
@@ -183,10 +215,9 @@ class CssStyleCompletion():
             file_extension = os.path.splitext(view.file_name())[1]
         except:
             file_extension = os.path.splitext(view.name())[1]
-        if view.is_scratch():
+        file_name = view.file_name()
+        if not file_name:
             file_name = view.name()
-        else:
-            file_name = view.file_name()
 
         # if we have a project and we're working in a stand alone style file
         # return the project file name as the key
@@ -297,9 +328,22 @@ class CssStyleCompletionDeleteCacheCommand(sublime_plugin.WindowCommand):
     global cache_path, cssStyleCompletion
 
     def run(self):
-        if cache_path:
+        if cache_path and os.path.isfile(cache_path):
             os.remove(cache_path)
             cssStyleCompletion.projects_cache = {}
+
+
+class AddToCacheCommand(sublime_plugin.WindowCommand):
+    def run(self, paths=[], name="", file_type="*.*"):
+        import glob
+        current_delay = 100
+        for path in paths:
+            if os.path.isdir(path):
+                sublime.set_timeout(lambda: load_external_files(
+                    glob.glob(path + os.path.sep + file_type),
+                    as_scratch=False
+                ), current_delay)
+                current_delay = current_delay + 100
 
 
 class CssStyleCompletionEvent(sublime_plugin.EventListener):
