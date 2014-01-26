@@ -112,7 +112,7 @@ def load_external_files(file_list, as_scratch=True):
             scratch_view.set_syntax_file(syntax_file[file_extension])
             current_syntax['isThis'] = syntax_file[file_extension]
         sublime.status_message(
-            'CSS Extended: parsing file %s of %s' % (indx, file_count)
+            'CSS Extended: parsing file %s of %s' % (indx + 1, file_count)
         )
         try:
             scratch_view.set_name(file_path)
