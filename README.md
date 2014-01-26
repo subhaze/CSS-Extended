@@ -3,6 +3,8 @@ CSS Extended Completions
 
 ###Sublime Text 2/3
 
+----
+
 ####Completion Cache
 
 Caches completions on document save.
@@ -11,10 +13,15 @@ Caches completions on document save.
 
 * If the document is a .html/.php/etc... it will parse that file and extract any classes/IDs found within style tags and only show you those completions within that file, plus any from the main project cache.
 
-######Loading External Styles
+----
 
-You can eager load files from folders outside of your project via `load_external_files` setting. Provide an absolute path to any folder and the plugin will load in all css/less/scss files found within it.
+####Loading External Files
 
+You can eager load files from folders outside of your project via `load_external_files` setting.
+
+Example: `"load_external_files": ["/abs/path/to/css/*.css", "/abs/path/to/less/*.less"]`
+
+----
 
 ####Property/Value Completions
 
@@ -22,7 +29,9 @@ property/value completions such as `box-sizing`, additional font names for `font
 
 You can delete the cache via the command palette `CSS Completions: Delete Cache`
 
-### [Emmet](http://emmet.io) Support
+----
+
+#### [Emmet](http://emmet.io) Support
 
 Emmet support is enabled by default, you just need to add the following to your User Settings:
 

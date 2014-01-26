@@ -1,0 +1,4 @@
+Bug fix
+
+Adds a delay on loading external files for Sublime Text 2 which
+prevents plug-in from loading.
