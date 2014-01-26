@@ -42,6 +42,12 @@ Emmet support is enabled by default, you just need to add the following to your 
 Don't have Emmet? No problem, you won't have any problems with it being enable by default.  
 Still want to disable Emmet support? Just set `"use_emmet": false` in the user's package settings
 
+#### Load Files From Side Bar Menu
+
+You can easily add files from the side bar, just right click on a folder and select the type of files you'd like to load via `CSS Extended Completions > [file type(s)]`
+
+![](https://dl.dropboxusercontent.com/u/4790638/images/ST-load-files-from-side-bar.png)
+
 ### CSS Completion Examples
 ----
 ####Pseudo Selector Completions
