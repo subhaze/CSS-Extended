@@ -40,7 +40,7 @@ Emmet support is enabled by default, you just need to add the following to your 
 ```
 
 Don't have Emmet? No problem, you won't have any problems with it being enable by default.  
-Still want to disable Emmet support? Just set `"use_emmet": false` in the user's package settings
+Still want to disable Emmet support? Just set `"use_emmet": false` in the user's package settings or use the `Use Emmet` toggle from the menu `Preferences > Package Settings > CSS Extended Completions`
 
 ----
 
