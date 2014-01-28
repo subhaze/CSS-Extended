@@ -1,4 +1,4 @@
-import sublime, re
+import sublime, sublime_plugin, re
 
 
 def simpleCompletionSet(view, point, file_name):
@@ -75,3 +75,35 @@ def lessMixinCompletionSet(view, region, file_name):
         symbol + symbol_snippet + "\t " + file_name, symbol + symbol_snippet_completion + ';'
     )]
     return result
+
+
+symbol_dict = {
+    'class': 'entity.other.attribute-name.class.css - entity.other.less.mixin',
+    'id': 'entity.other.attribute-name.id.css',
+    'less_var': 'variable.other.less',
+    'less_mixin': 'entity.other.less.mixin',
+    'scss_var': 'variable.scss',
+    'scss_mixin': 'meta.at-rule.mixin.scss entity.name.function.scss',
+
+    # Define commands for each symbol type...
+    'class_command': simpleCompletionSet,
+    'id_command': simpleCompletionSet,
+    'less_var_command': simpleCompletionSet,
+    'less_mixin_command': lessMixinCompletionSet,
+    'scss_var_command': simpleCompletionSet,
+    'scss_mixin_command': scssMixinCompletionSet
+}
+
+
+class CssExtendedCompletionSetSettingCommand(sublime_plugin.ApplicationCommand):
+
+    """Enables/Disables settings"""
+
+    def run(self, setting):
+        s = sublime.load_settings('css_style_completions.sublime-settings')
+        s.set(setting, not s.get(setting, False))
+        sublime.save_settings('css_style_completions.sublime-settings')
+
+    def is_checked(self, setting):
+        s = sublime.load_settings('css_style_completions.sublime-settings')
+        return s.get(setting, False)

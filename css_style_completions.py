@@ -3,55 +3,21 @@ ST2 = int(sublime.version()) < 3000
 
 if ST2:
     # ST 2
-    from commands import *
+    import commands
+    import cache
 else:
     # ST 3
-    from .commands import *
+    from . import commands
+    from . import cache
+
+symbol_dict = commands.symbol_dict
+cache_path = cache.file_path
+cache_dir = cache.cache_dir
 
 cssStyleCompletion = None
-cache_path = None
 pseudo_selector_list = []
 scratch_view = None
 settings = {}
-
-symbol_dict = {
-    'class': 'entity.other.attribute-name.class.css - entity.other.less.mixin',
-    'id': 'entity.other.attribute-name.id.css',
-    'less_var': 'variable.other.less',
-    'less_mixin': 'entity.other.less.mixin',
-    'scss_var': 'variable.scss',
-    'scss_mixin': 'meta.at-rule.mixin.scss entity.name.function.scss',
-
-    # Define commands for each symbol type...
-    'class_command': simpleCompletionSet,
-    'id_command': simpleCompletionSet,
-    'less_var_command': simpleCompletionSet,
-    'less_mixin_command': lessMixinCompletionSet,
-    'scss_var_command': simpleCompletionSet,
-    'scss_mixin_command': scssMixinCompletionSet
-}
-
-if ST2:
-    cache_path = os.path.join(
-        sublime.packages_path(),
-        '..',
-        'Cache',
-        'CSS',
-        'CSS.completions.cache'
-    )
-
-if not ST2:
-    cache_path = os.path.join(
-        sublime.cache_path(),
-        'CSS',
-        'CSS.completions.cache'
-    )
-
-cache_path = os.path.abspath(cache_path)
-cache_dir = cache_path.replace('CSS.completions.cache', '')
-
-if not os.path.exists(cache_dir):
-    os.makedirs(cache_dir)
 
 
 def plugin_loaded():
@@ -84,7 +50,6 @@ def get_external_files():
 
 
 def load_external_files(file_list, as_scratch=True):
-    import time
     global scratch_view
     syntax_file = {
         'css': 'Packages/CSS/CSS.tmLanguage',
@@ -160,15 +125,7 @@ def create_output_panel(name):
 class CssStyleCompletion():
     def __init__(self, cache_path):
         self.cache_path = cache_path
-        self._loadCache()
-
-    def _loadCache(self):
-        try:
-            json_data = open(self.cache_path, 'r')
-            self.projects_cache = json.loads(json_data.read())
-            json_data.close()
-        except:
-            self.projects_cache = {}
+        self.projects_cache = cache.load()
 
     def _saveCache(self, view):
         global symbol_dict, settings
@@ -232,7 +189,10 @@ class CssStyleCompletion():
 
     def returnPseudoCompletions(self):
         global pseudo_selector_list
-        return [(selector + '\t pseudo selector', selector) for selector in pseudo_selector_list]
+        return [
+            (selector + '\t pseudo selector', selector)
+            for selector in pseudo_selector_list
+        ]
 
     def returnSymbolCompletions(self, view, symbol_type):
         global symbol_dict, settings

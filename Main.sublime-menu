@@ -24,6 +24,15 @@
                                 "command": "open_file",
                                 "args": {"file": "${packages}/User/css_style_completions.sublime-settings"},
                                 "caption": "Settings – User"
+                            },
+                            {
+                                "caption": "-"
+                            },
+                            {
+                                "command": "css_extended_completion_set_setting",
+                                "args": {"setting": "use_emmet"},
+                                "caption": "Use Emmet",
+                                "checkbox": true
                             }
                         ]
                     }
