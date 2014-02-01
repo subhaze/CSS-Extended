@@ -11,8 +11,7 @@ else:
     from . import cache
 
 symbol_dict = commands.symbol_dict
-cache_path = cache.file_path
-cache_dir = cache.cache_dir
+cache_path = ''
 
 cssStyleCompletion = None
 pseudo_selector_list = []
@@ -24,6 +23,8 @@ def plugin_loaded():
     # TODO: Getting too many globals...
     global cssStyleCompletion, cache_path
     global settings, pseudo_selector_list
+
+    cache_path = cache.get_cache_path()
 
     cssStyleCompletion = CssStyleCompletion(cache_path)
 
