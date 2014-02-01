@@ -5,25 +5,23 @@ if ST2:
     # ST 2
     import commands
     import cache
+    import settings
 else:
     # ST 3
     from . import commands
     from . import cache
+    from . import settings
 
-symbol_dict = commands.symbol_dict
 
 cssStyleCompletion = None
 pseudo_selector_list = []
 scratch_view = None
-settings = {}
 
 
 def plugin_loaded():
-    global cssStyleCompletion, settings, pseudo_selector_list
+    global cssStyleCompletion, pseudo_selector_list
 
     cssStyleCompletion = CssStyleCompletion(cache.get_cache_path())
-
-    settings = sublime.load_settings('css_style_completions.sublime-settings')
     pseudo_selector_list = settings.get("pseudo_selector_list")
 
     def init_file_loading():
@@ -37,7 +35,6 @@ def plugin_loaded():
 
 def get_external_files():
     import glob
-    global settings
 
     external_files = []
     for file_path in settings.get('load_external_files', []):
@@ -64,7 +61,7 @@ def load_external_files(file_list, as_scratch=True):
     file_count = len(file_list)
 
     def parse_file(file_path, indx):
-        global scratch_view, cssStyleCompletion, symbol_dict, settings
+        global scratch_view, cssStyleCompletion
         print('PARSING FILE', file_path)
         file_extension = os.path.splitext(file_path)[1][1:]
         if not file_extension in syntax_file:
@@ -161,8 +158,7 @@ class CssStyleCompletion():
         ]
 
     def returnSymbolCompletions(self, view, symbol_type):
-        global symbol_dict, settings
-        if not symbol_type in symbol_dict:
+        if not symbol_type in commands.symbol_dict:
             return []
         file_key, project_key = self.getProjectKeysOfView(
             view,
@@ -187,11 +183,12 @@ class CssStyleCompletion():
             ]
         else:
             # we have no cache so just return whats in the current view
-            return self.get_view_completions(view, symbol_dict[symbol_type])
+            return self.get_view_completions(
+                view, commands.symbol_dict[symbol_type]
+            )
 
     def get_view_completions(self, view, symbol_type):
-        global symbol_dict
-        if not symbol_type in symbol_dict:
+        if not symbol_type in commands.symbol_dict:
             return []
 
         # get filename with extension
@@ -199,10 +196,10 @@ class CssStyleCompletion():
             file_name = os.path.basename(view.file_name())
         except:
             file_name = os.path.basename(view.name())
-        symbols = view.find_by_selector(symbol_dict[symbol_type])
+        symbols = view.find_by_selector(commands.symbol_dict[symbol_type])
         results = []
         for point in symbols:
-            completion = symbol_dict[symbol_type+'_command'](view, point, file_name)
+            completion = commands.symbol_dict[symbol_type+'_command'](view, point, file_name)
             if completion is not None:
                 results.extend(completion)
         return list(set(results))
@@ -272,7 +269,7 @@ class AddToCacheCommand(sublime_plugin.WindowCommand):
 
 
 class CssStyleCompletionEvent(sublime_plugin.EventListener):
-    global cssStyleCompletion, symbol_dict, settings
+    global cssStyleCompletion
 
     def on_post_save(self, view):
         if not ST2:
