@@ -1,4 +1,4 @@
-import sublime, sublime_plugin, os, json, re, sys
+import sublime, sublime_plugin, os, json, re
 ST2 = int(sublime.version()) < 3000
 
 if ST2:

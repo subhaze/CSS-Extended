@@ -1,0 +1,6 @@
+Bug Fixes
+- Fixes issue where ST 3 would not properly load the cache file #13
+
+Enhancements
+- Adds a toggle in 'Preferences > Package Settings > CSS Extended Completions'
+  for emmet completions called 'Use Emmet'
