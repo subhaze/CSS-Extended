@@ -64,7 +64,7 @@ def load_external_files(file_list, as_scratch=True):
     file_count = len(file_list)
 
     def parse_file(file_path, indx):
-        global scratch_view
+        global scratch_view, cssStyleCompletion, symbol_dict, settings
         print('PARSING FILE', file_path)
         file_extension = os.path.splitext(file_path)[1][1:]
         if not file_extension in syntax_file:
@@ -82,7 +82,7 @@ def load_external_files(file_list, as_scratch=True):
                     'css_extended_completions_file',
                     {"content": f.read()}
                 )
-                cssStyleCompletion._saveCache(scratch_view)
+                cache.save_cache(scratch_view, cssStyleCompletion)
         except IOError:
             pass
 
@@ -122,36 +122,6 @@ class CssStyleCompletion():
     def __init__(self, cache_path):
         self.cache_path = cache_path
         self.projects_cache = cache.load()
-
-    def _saveCache(self, view):
-        global symbol_dict, settings
-        file_key, project_key = self.getProjectKeysOfView(view)
-        # if there is no project_key set the project_key as the file_key
-        # so that we can cache on a per file basis
-        if not project_key:
-            project_key = file_key
-        if project_key in self.projects_cache:
-            cache = self.projects_cache[project_key]
-        else:
-            cache = {}
-
-        for symbol in symbol_dict:
-            if '_command' in symbol:
-                continue
-            if symbol not in cache:
-                cache[symbol] = {}
-            completions = self.get_view_completions(view, symbol)
-            if completions:
-                cache[symbol][file_key] = completions
-            elif not cache[symbol]:
-                cache.pop(symbol, None)
-        if cache:
-            self.projects_cache[project_key] = cache
-        if settings.get('save_cache_to_file'):
-            # save data to disk
-            json_data = open(self.cache_path, 'w')
-            json_data.write(json.dumps(self.projects_cache))
-            json_data.close()
 
     def getProjectKeysOfView(self, view, return_both=False):
         if view.is_scratch():
@@ -302,15 +272,15 @@ class AddToCacheCommand(sublime_plugin.WindowCommand):
 
 
 class CssStyleCompletionEvent(sublime_plugin.EventListener):
-    global cssStyleCompletion
+    global cssStyleCompletion, symbol_dict, settings
 
     def on_post_save(self, view):
         if not ST2:
             return
-        cssStyleCompletion._saveCache(view)
+        cache.save_cache(view, cssStyleCompletion)
 
     def on_post_save_async(self, view):
-        cssStyleCompletion._saveCache(view)
+        cache.save_cache(view, cssStyleCompletion)
 
     def on_query_completions(self, view, prefix, locations):
         # inside HTML scope completions
