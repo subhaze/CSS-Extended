@@ -11,7 +11,6 @@ else:
     from . import cache
 
 symbol_dict = commands.symbol_dict
-cache_path = ''
 
 cssStyleCompletion = None
 pseudo_selector_list = []
@@ -20,13 +19,9 @@ settings = {}
 
 
 def plugin_loaded():
-    # TODO: Getting too many globals...
-    global cssStyleCompletion, cache_path
-    global settings, pseudo_selector_list
+    global cssStyleCompletion, settings, pseudo_selector_list
 
-    cache_path = cache.get_cache_path()
-
-    cssStyleCompletion = CssStyleCompletion(cache_path)
+    cssStyleCompletion = CssStyleCompletion(cache.get_cache_path())
 
     settings = sublime.load_settings('css_style_completions.sublime-settings')
     pseudo_selector_list = settings.get("pseudo_selector_list")
@@ -286,12 +281,11 @@ class CssStyleCompletion():
 
 class CssStyleCompletionDeleteCacheCommand(sublime_plugin.WindowCommand):
     """Deletes all cache that plugin has created"""
-    global cache_path, cssStyleCompletion
+    global cssStyleCompletion
 
     def run(self):
-        if cache_path and os.path.isfile(cache_path):
-            os.remove(cache_path)
-            cssStyleCompletion.projects_cache = {}
+        cache.remove_cache()
+        cssStyleCompletion.projects_cache = {}
 
 
 class AddToCacheCommand(sublime_plugin.WindowCommand):
