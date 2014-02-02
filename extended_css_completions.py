@@ -1,31 +1,31 @@
-import sublime, sublime_plugin
-import re
+import sublime, sublime_plugin, re
 
 
-common = {  "color": ["rgb($1)", "rgba($1)", "hsl($1)", "hsla($1)", "transparent"],
-            "uri": ["url($1)"],
-            "border-style": ["none", "hidden", "dotted", "dashed", "solid", "double", "groove", "ridge", "inset", "outset"],
-            "border-width": ["thin", "medium", "thick"],
-            "box": ["border-box", "padding-box", "content-box"],
-            "shape": ["rect($1)"],
-            "generic-family": ["serif", "sans-serif", "cursive", "fantasy", "monospace"],
-            "family-name": [
-                "Impact, Charcoal, sans-serif",
-                "'Century Gothic', sans-serif",
-                "'Lucida Sans Unicode', 'Lucida Grande', sans-serif",
-                "'Arial Black', Gadget, sans-serif",
-                "'Times New Roman', Times, serif",
-                "'Arial Narrow', sans-serif",
-                "Verdana, Geneva, sans-serif",
-                "Copperplate, Copperplate Gothic Light, sans-serif",
-                "'Lucida Console', Monaco, monospace",
-                "Gill Sans / Gill Sans MT, sans-serif",
-                "'Trebuchet MS', Helvetica, sans-serif",
-                "'Courier New', Courier, monospace",
-                "Arial, Helvetica, sans-serif",
-                "Georgia, Serif"
-            ]
-        }
+common = {
+    "color": ["rgb($1)", "rgba($1)", "hsl($1)", "hsla($1)", "transparent"],
+    "uri": ["url($1)"],
+    "border-style": ["none", "hidden", "dotted", "dashed", "solid", "double", "groove", "ridge", "inset", "outset"],
+    "border-width": ["thin", "medium", "thick"],
+    "box": ["border-box", "padding-box", "content-box"],
+    "shape": ["rect($1)"],
+    "generic-family": ["serif", "sans-serif", "cursive", "fantasy", "monospace"],
+    "family-name": [
+        "Impact, Charcoal, sans-serif",
+        "'Century Gothic', sans-serif",
+        "'Lucida Sans Unicode', 'Lucida Grande', sans-serif",
+        "'Arial Black', Gadget, sans-serif",
+        "'Times New Roman', Times, serif",
+        "'Arial Narrow', sans-serif",
+        "Verdana, Geneva, sans-serif",
+        "Copperplate, Copperplate Gothic Light, sans-serif",
+        "'Lucida Console', Monaco, monospace",
+        "Gill Sans / Gill Sans MT, sans-serif",
+        "'Trebuchet MS', Helvetica, sans-serif",
+        "'Courier New', Courier, monospace",
+        "Arial, Helvetica, sans-serif",
+        "Georgia, Serif"
+    ]
+}
 
 css_data = """
 "font-family"=<family-name> | <generic-family>| inherit
@@ -139,6 +139,7 @@ def parse_css_data(data):
 
     return props
 
+
 class CSSCompletions(sublime_plugin.EventListener):
     props = None
     rex = None
@@ -152,9 +153,11 @@ class CSSCompletions(sublime_plugin.EventListener):
             self.rex = re.compile("([a-zA-Z-]+):\s*$")
 
         l = []
-        if (view.match_selector(locations[0], "meta.property-value.css") or
+        if (
+            view.match_selector(locations[0], "meta.property-value.css")
             # This will catch scenarios like .foo {font-style: |}
-            view.match_selector(locations[0] - 1, "meta.property-value.css")):
+            or view.match_selector(locations[0] - 1, "meta.property-value.css")
+        ):
             loc = locations[0] - len(prefix)
             line = view.substr(sublime.Region(view.line(loc).begin(), loc))
 

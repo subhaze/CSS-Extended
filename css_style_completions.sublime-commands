@@ -1,6 +1,6 @@
 [
-	{
-		"caption": "CSS Completions: Delete Cache",
-		"command": "css_style_completion_delete_cache"
-	}
+    {
+        "caption": "CSS Completions: Delete Cache",
+        "command": "css_style_completion_delete_cache"
+    }
 ]

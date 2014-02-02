@@ -1,5 +1,6 @@
 import sublime, sublime_plugin, os, re
 
+
 ST2 = int(sublime.version()) < 3000
 scratch_view = None
 cssStyleCompletion = None

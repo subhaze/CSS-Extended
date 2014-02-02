@@ -5,6 +5,17 @@ CSS Extended Completions
 
 ----
 
+####Out of The Box Completions
+
+| Compltion Type | Completion Result |
+| -------------- |:-----------------:|
+| col 3 is       | right-aligned     |
+| col 2 is       | centered          |
+| zebra stripes  | are neat          |
+
+
+----
+
 ####Completion Cache
 
 Caches completions on document save.

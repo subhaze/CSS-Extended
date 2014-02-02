@@ -17,7 +17,7 @@ def scssMixinCompletionSet(view, region, file_name):
     re_split_params = re.compile(r',')
     end_region = view.find(r'\{', region.b)
     symbol = view.substr(region)
-    symbol_snippet = view.substr(sublime.Region(region.b,end_region.a)).strip()
+    symbol_snippet = view.substr(sublime.Region(region.b, end_region.a)).strip()
     # removes the parenthesis so we can template the parameters
     symbol_snippet = symbol_snippet[1:-1].strip()
     # used for displaying in the completion list
