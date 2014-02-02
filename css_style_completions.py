@@ -1,4 +1,4 @@
-import sublime, sublime_plugin, os, json, re
+import sublime, sublime_plugin, os
 ST2 = int(sublime.version()) < 3000
 
 if ST2:
@@ -6,16 +6,19 @@ if ST2:
     import commands
     import cache
     import settings
+    import location
+    import parser
 else:
     # ST 3
     from . import commands
     from . import cache
     from . import settings
+    from . import location
+    from . import parser
 
 
 cssStyleCompletion = None
 pseudo_selector_list = []
-scratch_view = None
 
 
 def plugin_loaded():
@@ -23,132 +26,13 @@ def plugin_loaded():
 
     cssStyleCompletion = CssStyleCompletion(cache.get_cache_path())
     pseudo_selector_list = settings.get("pseudo_selector_list")
-
-    def init_file_loading():
-        if not sublime.active_window():
-            sublime.set_timeout(lambda: init_file_loading(), 500)
-        else:
-            load_external_files(get_external_files())
-
-    init_file_loading()
-
-
-def get_external_files():
-    import glob
-
-    external_files = []
-    for file_path in settings.get('load_external_files', []):
-        external_files.extend(glob.glob(file_path))
-    return external_files
-
-
-def load_external_files(file_list, as_scratch=True):
-    global scratch_view
-    syntax_file = {
-        'css': 'Packages/CSS/CSS.tmLanguage',
-        'less': 'Packages/LESS/LESS.tmLanguage',
-        'scss': 'Packages/SCSS/SCSS.tmLanguage'
-    }
-
-    scratch_view = create_output_panel('CSS Extended Completions')
-    scratch_view.set_scratch(as_scratch)
-    # sort file list by extension to reduce the frequency
-    # of syntax file loads
-    sorted(file_list, key=lambda x: x.split(".")[-1])
-    current_syntax = {
-        'isThis': ''
-    }
-    file_count = len(file_list)
-
-    def parse_file(file_path, indx):
-        global scratch_view, cssStyleCompletion
-        print('PARSING FILE', file_path)
-        file_extension = os.path.splitext(file_path)[1][1:]
-        if not file_extension in syntax_file:
-            return
-        if not syntax_file[file_extension] == current_syntax['isThis']:
-            scratch_view.set_syntax_file(syntax_file[file_extension])
-            current_syntax['isThis'] = syntax_file[file_extension]
-        sublime.status_message(
-            'CSS Extended: parsing file %s of %s' % (indx + 1, file_count)
-        )
-        try:
-            scratch_view.set_name(file_path)
-            with open(file_path, 'r') as f:
-                sublime.active_window().run_command(
-                    'css_extended_completions_file',
-                    {"content": f.read()}
-                )
-                cache.save_cache(scratch_view, cssStyleCompletion)
-        except IOError:
-            pass
-
-    parse_delay = 0
-    for indx, file_path in enumerate(file_list):
-        if not os.path.isfile(file_path):
-            continue
-        sublime.set_timeout(
-            lambda file_path=file_path, indx=indx: parse_file(file_path, indx),
-            parse_delay
-        )
-        parse_delay = parse_delay + 250
-
-
-class CssExtendedCompletionsFileCommand(sublime_plugin.TextCommand):
-        global scratch_view
-
-        def run(self, edit, content):
-            # add space between any )} chars
-            # ST3 throws an error in some LESS files that do this
-            content = re.sub(r'\)\}', r') }', content)
-            scratch_view.erase(edit, sublime.Region(0, scratch_view.size()))
-            scratch_view.insert(edit, 0, content)
-
-
-def create_output_panel(name):
-    '''
-        Used for loading in files outside of project view
-    '''
-    if ST2:
-        return sublime.active_window().get_output_panel(name)
-    else:
-        return sublime.active_window().create_output_panel(name)
+    parser.init_file_loading(cssStyleCompletion)
 
 
 class CssStyleCompletion():
     def __init__(self, cache_path):
         self.cache_path = cache_path
         self.projects_cache = cache.load()
-
-    def getProjectKeysOfView(self, view, return_both=False):
-        if view.is_scratch():
-            project_name = view.name()
-        if not ST2:
-            project_name = sublime.active_window().project_file_name()
-        if ST2 or not project_name:
-            # we could be ST3 but not in a true project
-            # so fall back to using current folders opened within ST
-            project_name = '-'.join(sublime.active_window().folders())
-
-        css_extension = settings.get("css_extension")
-        try:
-            file_extension = os.path.splitext(view.file_name())[1]
-        except:
-            file_extension = os.path.splitext(view.name())[1]
-        file_name = view.file_name()
-        if not file_name:
-            file_name = view.name()
-
-        # if we have a project and we're working in a stand alone style file
-        # return the project file name as the key
-        if file_extension in css_extension and project_name:
-            return (file_name, project_name)
-        # if we are not overriding to get both keys
-        # just return the file_name/file_key
-        if not return_both:
-            return (file_name, None)
-        elif return_both and project_name:
-            return (file_name, project_name)
 
     def returnPseudoCompletions(self):
         global pseudo_selector_list
@@ -160,13 +44,13 @@ class CssStyleCompletion():
     def returnSymbolCompletions(self, view, symbol_type):
         if not symbol_type in commands.symbol_dict:
             return []
-        file_key, project_key = self.getProjectKeysOfView(
+        file_key, project_key = cache.get_keys(
             view,
             return_both=True
         )
         completion_list = []
 
-        for file in get_external_files():
+        for file in parser.get_external_files():
             if file in self.projects_cache:
                 completion_list = completion_list + self.projects_cache[file][symbol_type][file]
         if file_key in self.projects_cache:
@@ -210,41 +94,6 @@ class CssStyleCompletion():
             results += self.get_view_completions(view, 'class')
         return list(set(results))
 
-    def at_html_attribute(self, attribute, view, locations):
-        selector = view.match_selector(locations[0], settings.get("html_attribute_scope"))
-        if not selector:
-            return False
-        check_attribute = ''
-        view_point = locations[0]
-        char = ''
-        selector_score = 1
-        while((char != ' ' or selector_score != 0) and view_point > -1):
-            char = view.substr(view_point)
-            selector_score = view.score_selector(view_point, 'string')
-            if(char != ' ' or selector_score != 0):
-                check_attribute += char
-            view_point -= 1
-        check_attribute = check_attribute[::-1]
-        if check_attribute.startswith(attribute):
-                return True
-        return False
-
-    def at_style_symbol(self, style_symbol, style_scope, view, locations):
-        selector = view.match_selector(locations[0], style_scope)
-        if not selector:
-            return False
-        check_attribute = ''
-        view_point = locations[0] - 1
-        char = ''
-        while(char != style_symbol and not re.match(r'[\n ]', char) and view_point > -1):
-            char = view.substr(view_point)
-            check_attribute += char
-            view_point -= 1
-        check_attribute = check_attribute[::-1]
-        if check_attribute.startswith(style_symbol):
-            return True
-        return False
-
 
 class CssStyleCompletionDeleteCacheCommand(sublime_plugin.WindowCommand):
     """Deletes all cache that plugin has created"""
@@ -261,7 +110,7 @@ class AddToCacheCommand(sublime_plugin.WindowCommand):
         current_delay = 100
         for path in paths:
             if os.path.isdir(path):
-                sublime.set_timeout(lambda: load_external_files(
+                sublime.set_timeout(lambda: parser.load_external_files(
                     glob.glob(path + os.path.sep + file_type),
                     as_scratch=False
                 ), current_delay)
@@ -281,30 +130,43 @@ class CssStyleCompletionEvent(sublime_plugin.EventListener):
 
     def on_query_completions(self, view, prefix, locations):
         # inside HTML scope completions
-        if cssStyleCompletion.at_html_attribute('class', view, locations):
-            return (cssStyleCompletion.returnSymbolCompletions(view, 'class'), sublime.INHIBIT_WORD_COMPLETIONS)
-        if cssStyleCompletion.at_html_attribute('id', view, locations):
-            return (cssStyleCompletion.returnSymbolCompletions(view, 'id'), sublime.INHIBIT_WORD_COMPLETIONS)
+        html_attr_scope = view.match_selector(
+            locations[0], settings.get("html_attribute_scope")
+        )
+
+        class_attr = location.at_html_attribute('class', view, locations)
+        if class_attr and html_attr_scope:
+            return (
+                cssStyleCompletion.returnSymbolCompletions(view, 'class'),
+                sublime.INHIBIT_WORD_COMPLETIONS
+            )
+
+        id_attr = location.at_html_attribute('id', view, locations)
+        if id_attr and html_attr_scope:
+            return (
+                cssStyleCompletion.returnSymbolCompletions(view, 'id'),
+                sublime.INHIBIT_WORD_COMPLETIONS
+            )
 
         # inside HTML with Emmet completions
         if settings.get("use_emmet"):
-            if cssStyleCompletion.at_style_symbol('.', settings.get("emmet_scope"), view, locations):
+            if location.at_style_symbol('.', settings.get("emmet_scope"), view, locations):
                 return (cssStyleCompletion.returnSymbolCompletions(view, 'class'), sublime.INHIBIT_WORD_COMPLETIONS)
-            if cssStyleCompletion.at_style_symbol('#', settings.get("emmet_scope"), view, locations):
+            if location.at_style_symbol('#', settings.get("emmet_scope"), view, locations):
                 return (cssStyleCompletion.returnSymbolCompletions(view, 'id'), sublime.INHIBIT_WORD_COMPLETIONS)
 
         # inside CSS scope pseudo completions
-        if cssStyleCompletion.at_style_symbol(':', settings.get("css_completion_scope"), view, locations):
+        if location.at_style_symbol(':', settings.get("css_completion_scope"), view, locations):
             return (cssStyleCompletion.returnPseudoCompletions(), sublime.INHIBIT_WORD_COMPLETIONS)
 
         # inside CSS scope symbol completions
-        if cssStyleCompletion.at_style_symbol('.', settings.get("css_completion_scope"), view, locations):
+        if location.at_style_symbol('.', settings.get("css_completion_scope"), view, locations):
             return (cssStyleCompletion.returnSymbolCompletions(view, 'class'), sublime.INHIBIT_WORD_COMPLETIONS)
-        if cssStyleCompletion.at_style_symbol('#', settings.get("css_completion_scope"), view, locations):
+        if location.at_style_symbol('#', settings.get("css_completion_scope"), view, locations):
             return (cssStyleCompletion.returnSymbolCompletions(view, 'id'), sublime.INHIBIT_WORD_COMPLETIONS)
 
         # inside LESS scope symbol completions
-        if cssStyleCompletion.at_style_symbol(
+        if location.at_style_symbol(
             '@', 'source.less',
             view, locations
         ):
@@ -314,7 +176,7 @@ class CssStyleCompletionEvent(sublime_plugin.EventListener):
                 ), sublime.INHIBIT_EXPLICIT_COMPLETIONS | sublime.INHIBIT_WORD_COMPLETIONS
             )
 
-        if cssStyleCompletion.at_style_symbol(
+        if location.at_style_symbol(
             '.', 'source.less - parameter.less',
             view, locations
         ):
@@ -325,7 +187,7 @@ class CssStyleCompletionEvent(sublime_plugin.EventListener):
             )
 
         # inside SCSS scope symbol completions
-        if cssStyleCompletion.at_style_symbol(
+        if location.at_style_symbol(
             '$', 'source.scss, meta.property-value.scss',
             view, locations
         ):

@@ -1,5 +1,7 @@
 import sublime, sublime_plugin, re
 
+ST2 = int(sublime.version()) < 3000
+
 
 def simpleCompletionSet(view, point, file_name):
     symbols = view.substr(point).strip()
