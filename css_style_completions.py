@@ -181,9 +181,11 @@ class CssStyleCompletionEvent(sublime_plugin.EventListener):
             view, locations
         ):
             return (
-                cssStyleCompletion.returnSymbolCompletions(
+                (cssStyleCompletion.returnSymbolCompletions(
                     view, 'less_mixin'
-                ), sublime.INHIBIT_EXPLICIT_COMPLETIONS | sublime.INHIBIT_WORD_COMPLETIONS
+                ) + cssStyleCompletion.returnSymbolCompletions(
+                    view, 'class'
+                )), sublime.INHIBIT_EXPLICIT_COMPLETIONS | sublime.INHIBIT_WORD_COMPLETIONS
             )
 
         # inside SCSS scope symbol completions
