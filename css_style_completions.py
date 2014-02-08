@@ -7,14 +7,14 @@ if ST2:
     import cache
     import settings
     import location
-    import parser
+    import style_parser
 else:
     # ST 3
     from . import commands
     from . import cache
     from . import settings
     from . import location
-    from . import parser
+    from . import style_parser
 
 
 cssStyleCompletion = None
@@ -26,7 +26,7 @@ def plugin_loaded():
 
     cssStyleCompletion = CssStyleCompletion(cache.get_cache_path())
     pseudo_selector_list = settings.get("pseudo_selector_list")
-    parser.init_file_loading(cssStyleCompletion)
+    style_parser.init_file_loading(cssStyleCompletion)
 
 
 class CssStyleCompletion():
@@ -50,7 +50,7 @@ class CssStyleCompletion():
         )
         completion_list = []
 
-        for file in parser.get_external_files():
+        for file in style_parser.get_external_files():
             if file in self.projects_cache:
                 completion_list = completion_list + self.projects_cache[file][symbol_type][file]
         if file_key in self.projects_cache:
@@ -110,7 +110,7 @@ class AddToCacheCommand(sublime_plugin.WindowCommand):
         current_delay = 100
         for path in paths:
             if os.path.isdir(path):
-                sublime.set_timeout(lambda: parser.load_external_files(
+                sublime.set_timeout(lambda: style_parser.load_external_files(
                     glob.glob(path + os.path.sep + file_type),
                     as_scratch=False
                 ), current_delay)
@@ -127,6 +127,13 @@ class CssStyleCompletionEvent(sublime_plugin.EventListener):
 
     def on_post_save_async(self, view):
         cache.save_cache(view, cssStyleCompletion)
+
+    def on_load(self, view):
+        if settings.get('auto_trigger_emmet_completions', False):
+            emmet_trigger = {'selector': 'text.html', 'characters': '.#'}
+            triggers = view.settings().get('auto_complete_triggers')
+            triggers.append(emmet_trigger)
+            view.settings().set('auto_complete_triggers', triggers)
 
     def on_query_completions(self, view, prefix, locations):
         # inside HTML scope completions

@@ -36,6 +36,7 @@ def get_cache_path():
 
 def remove_cache():
     global _file_path
+
     if _file_path and os.path.isfile(_file_path):
         os.remove(_file_path)
 

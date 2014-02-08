@@ -31,7 +31,13 @@
                             {
                                 "command": "css_extended_completion_set_setting",
                                 "args": {"setting": "use_emmet"},
-                                "caption": "Use Emmet",
+                                "caption": "Enable Emmet Completions",
+                                "checkbox": true
+                            },
+                            {
+                                "command": "css_extended_completion_set_setting",
+                                "args": {"setting": "auto_trigger_emmet_completions"},
+                                "caption": "Auto Trigger Emmet Completions",
                                 "checkbox": true
                             },
                             {
