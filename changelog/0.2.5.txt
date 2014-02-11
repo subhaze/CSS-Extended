@@ -1,0 +1,4 @@
+Maintenance Release
+
+Updates
+- Adds CSS symbol completions within LESS files
