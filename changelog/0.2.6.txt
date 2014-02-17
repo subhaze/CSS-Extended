@@ -1,0 +1,3 @@
+Bug Fix (ST 2)
+
+- Not displaying Class or ID's in HTML doc (ST2), Fixes #15
