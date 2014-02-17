@@ -3,6 +3,13 @@ CSS Extended Completions
 
 ###Sublime Text 2/3
 
+---
+
+This plug-in is beta quality so please file any issues you run into here: https://github.com/subhaze/CSS-Extended/issues?state=open
+
+Include: Sublime Text version, OS, and any error that you can find in the Sublime Text console (ctrl+`)
+
+---
 
 ####Completion Cache
 
