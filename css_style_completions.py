@@ -219,4 +219,4 @@ class CssStyleCompletionEvent(sublime_plugin.EventListener):
         return None
 
 if ST2:
-    plugin_loaded()
+    sublime.set_timeout(lambda: plugin_loaded(), 0)
