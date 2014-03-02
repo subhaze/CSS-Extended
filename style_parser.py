@@ -1,26 +1,23 @@
 import sublime, sublime_plugin, os, re
 
-
 ST2 = int(sublime.version()) < 3000
 scratch_view = None
-cssStyleCompletion = None
 
 if ST2:
-    import cache
+    import completions
     import settings
+    import project
 else:
-    from . import cache
+    from . import completions
     from . import settings
+    from . import project
 
 
-def init_file_loading(csc):
-    global cssStyleCompletion
-    cssStyleCompletion = csc
-
+def init_file_loading():
     if not sublime.active_window():
-        sublime.set_timeout(lambda: init_file_loading(cssStyleCompletion), 500)
+        sublime.set_timeout(lambda: init_file_loading(), 500)
     else:
-        load_external_files(get_external_files())
+        load_external_files(project.get_external_files())
 
 
 def create_output_panel(name):
@@ -31,15 +28,6 @@ def create_output_panel(name):
         return sublime.active_window().get_output_panel(name)
     else:
         return sublime.active_window().create_output_panel(name)
-
-
-def get_external_files():
-    import glob
-
-    external_files = []
-    for file_path in settings.get('load_external_files', []):
-        external_files.extend(glob.glob(file_path))
-    return external_files
 
 
 def load_external_files(file_list, as_scratch=True):
@@ -61,7 +49,7 @@ def load_external_files(file_list, as_scratch=True):
     file_count = len(file_list)
 
     def parse_file(file_path, indx):
-        global scratch_view, cssStyleCompletion
+        global scratch_view
         print('PARSING FILE', file_path)
         file_extension = os.path.splitext(file_path)[1][1:]
         if not file_extension in syntax_file:
@@ -79,7 +67,7 @@ def load_external_files(file_list, as_scratch=True):
                     'css_extended_completions_file',
                     {"content": f.read()}
                 )
-                cache.save_cache(scratch_view, cssStyleCompletion)
+                completions.update(scratch_view)
         except IOError:
             pass
 

@@ -9,6 +9,7 @@ else:
     from . import commands
     from . import settings
 
+projects_cache = {}
 _file_path = None
 
 
@@ -42,42 +43,22 @@ def remove_cache():
 
 
 def load():
+    global projects_cache
     if not settings.get('save_cache_to_file'):
-        return {}
+        return
     try:
         with open(get_cache_path(), 'r') as json_data:
-            return json.loads(json_data.read())
+            projects_cache = json.loads(json_data.read())
     except:
-        return {}
+        return
 
 
-def save_cache(view, cssStyleCompletion):
-    file_key, project_key = get_keys(view)
-    # if there is no project_key set the project_key as the file_key
-    # so that we can cache on a per file basis
-    if not project_key:
-        project_key = file_key
-    if project_key in cssStyleCompletion.projects_cache:
-        cache = cssStyleCompletion.projects_cache[project_key]
-    else:
-        cache = {}
-
-    for symbol in commands.symbol_dict:
-        if '_command' in symbol:
-            continue
-        if symbol not in cache:
-            cache[symbol] = {}
-        completions = cssStyleCompletion.get_view_completions(view, symbol)
-        if completions:
-            cache[symbol][file_key] = completions
-        elif not cache[symbol]:
-            cache.pop(symbol, None)
-    if cache:
-        cssStyleCompletion.projects_cache[project_key] = cache
+def save_cache():
+    global projects_cache
     if settings.get('save_cache_to_file'):
         # save data to disk
-        json_data = open(cssStyleCompletion.cache_path, 'w')
-        json_data.write(json.dumps(cssStyleCompletion.projects_cache))
+        json_data = open(get_cache_path(), 'w')
+        json_data.write(json.dumps(projects_cache))
         json_data.close()
 
 
