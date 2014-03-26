@@ -5,13 +5,20 @@ CSS Extended Completions
 
 ---
 
-This plug-in is beta quality so please file any issues you run into here: https://github.com/subhaze/CSS-Extended/issues?state=open
-
-Include: Sublime Text version, OS, and any error that you can find in the Sublime Text console (ctrl+`)
+This plug-in is beta quality so please file any issues you run into here: https://github.com/subhaze/CSS-Extended/issues?state=open Include Sublime Text version, OS, and any error that you can find in the Sublime Text console (ctrl+`)
 
 ---
+###Usage
 
-####Completion Cache
+#### Load Files From Side Bar Menu
+
+You can add files from the side bar, just right click on a folder and select the type of files you'd like to load via `CSS Extended Completions > [file type(s)]`
+
+![](https://dl.dropboxusercontent.com/u/4790638/images/ST-load-files-from-side-bar.png)
+
+----
+
+####Cache On Save
 
 Caches completions on document save.
 
@@ -49,12 +56,6 @@ Don't have Emmet? No problem, you won't have any problems with it being enable b
 Still want to disable Emmet support? Just set `"use_emmet": false` in the user's package settings or use the `Use Emmet` toggle from the menu `Preferences > Package Settings > CSS Extended Completions`
 
 ----
-
-#### Load Files From Side Bar Menu
-
-You can easily add files from the side bar, just right click on a folder and select the type of files you'd like to load via `CSS Extended Completions > [file type(s)]`
-
-![](https://dl.dropboxusercontent.com/u/4790638/images/ST-load-files-from-side-bar.png)
 
 ### CSS Completion Examples
 ----
