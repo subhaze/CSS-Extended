@@ -9,6 +9,10 @@ This plug-in is beta quality so please file any issues you run into here: https:
 
 Include: Sublime Text version, OS, and any error that you can find in the Sublime Text console (ctrl+`)
 
+_NOTICE_
+
+Due to how Sublime Text 3's CSS Package overrides completions, you *MUST* invoke completions with `ctrl+space` when working within CSS files
+
 ---
 
 ####Completion Cache
