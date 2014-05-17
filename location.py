@@ -12,7 +12,7 @@ def at_html_attribute(attribute, view, locations):
         if(char != ' ' or selector_score != 0):
             check_attribute += char
         view_point -= 1
-    check_attribute = check_attribute[::-1]
+    check_attribute = check_attribute[::-1].replace('(', '')
     if check_attribute.startswith(attribute):
             return True
     return False
