@@ -5,6 +5,8 @@
     "save_cache_to_file": true,
     "css_completion_scope": "meta.selector.css",
     "html_attribute_scope": "string.quoted.double.html, string.quoted.single.html, string.quoted.jade",
+    // enables indexing of HTML class/id attributes that are not in cache
+    "index_html_attributes": true,
     // returns class/id completions when typing out emmet expressions
     "use_emmet": true,
     // 'use_emmet' must be enabled for this to work correctly.
@@ -12,6 +14,38 @@
     "auto_trigger_emmet_completions": true,
     "emmet_scope": "text.html, source.cshtml, source.jade",
     "css_extension": [".css",".less",".scss"],
+
+    // List from http://www.awayback.com/revised-font-stack/
+    "font_list": [
+        // serif
+        "Garamond, Baskerville, 'Baskerville Old Face', 'Hoefler Text', 'Times New Roman',  serif",
+        "'Lucida Bright', Georgia,  serif",
+        "Palatino, 'Palatino Linotype',  'Palatino LT STD', 'Book Antiqua', Georgia, serif",
+        "'Big Caslon', 'Book Antiqua', 'Palatino Linotype', Georgia, serif",
+        "Didot, 'Didot LT STD', 'Hoefler Text', Garamond,  'Times New Roman', serif",
+        "Baskerville, 'Baskerville old face', 'Hoefler Text', Garamond,  'Times New Roman', serif",
+        "'Hoefler Text', 'Baskerville old face', Garamond, 'Times New Roman', serif",
+        "'Bodoni MT', Didot, 'Didot LT STD', 'Hoefler Text', Garamond,  'Times New Roman',  serif",
+        "'Goudy Old Style', Garamond, 'Big Caslon', 'Times New Roman',  serif",
+        "Constantia, Palatino, 'Palatino Linotype',  'Palatino LT STD', Georgia, serif",
+        "Cambria, Georgia, serif",
+        "'Book Antiqua', Palatino, 'Palatino Linotype', 'Palatino LT STD', Georgia, serif",
+
+        // sans-serif
+        "Optima, Segoe,  'Segoe UI', Candara, Calibri, Arial, sans-serif",
+        "Futura, 'Trebuchet MS', Arial, sans-serif",
+        "'Gill Sans', 'Gill Sans MT', Calibri, sans-serif",
+        "'Trebuchet MS', 'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', Tahoma,  sans-serif",
+        "'Helvetica Neue', Helvetica, Arial, sans-serif",
+        "Verdana, Geneva, sans-serif",
+        "'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', Geneva, Verdana, sans-serif",
+        "Geneva, Tahoma, Verdana, sans-serif",
+        "Segoe, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
+        "Candara, Calibri, Segoe, 'Segoe UI', Optima, Arial, sans-serif",
+        "Calibri, Candara, Segoe, 'Segoe UI', Optima, Arial, sans-serif",
+        "'Franklin Gothic Medium', Arial, sans-serif",
+        "Tahoma, Geneva, Verdana, sans-serif"
+    ],
     "pseudo_selector_list": [
         "after",
         "before",

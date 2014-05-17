@@ -1,5 +1,10 @@
 import sublime, sublime_plugin, re
 
+ST2 = int(sublime.version()) < 3000
+if ST2:
+    import settings
+else:
+    from . import settings
 
 common = {
     "color": ["rgb($1)", "rgba($1)", "hsl($1)", "hsla($1)", "transparent"],
@@ -9,22 +14,7 @@ common = {
     "box": ["border-box", "padding-box", "content-box"],
     "shape": ["rect($1)"],
     "generic-family": ["serif", "sans-serif", "cursive", "fantasy", "monospace"],
-    "family-name": [
-        "Impact, Charcoal, sans-serif",
-        "'Century Gothic', sans-serif",
-        "'Lucida Sans Unicode', 'Lucida Grande', sans-serif",
-        "'Arial Black', Gadget, sans-serif",
-        "'Times New Roman', Times, serif",
-        "'Arial Narrow', sans-serif",
-        "Verdana, Geneva, sans-serif",
-        "Copperplate, Copperplate Gothic Light, sans-serif",
-        "'Lucida Console', Monaco, monospace",
-        "Gill Sans / Gill Sans MT, sans-serif",
-        "'Trebuchet MS', Helvetica, sans-serif",
-        "'Courier New', Courier, monospace",
-        "Arial, Helvetica, sans-serif",
-        "Georgia, Serif"
-    ]
+    "family-name": settings.get('font_list', [])
 }
 
 css_data = """
