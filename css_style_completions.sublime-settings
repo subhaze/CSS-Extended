@@ -4,13 +4,13 @@
     "load_external_files": [],
     "save_cache_to_file": true,
     "css_completion_scope": "meta.selector.css",
-    "html_attribute_scope": "string.quoted.double.html, string.quoted.single.html",
+    "html_attribute_scope": "string.quoted.double.html, string.quoted.single.html, string.quoted.jade",
     // returns class/id completions when typing out emmet expressions
     "use_emmet": true,
     // 'use_emmet' must be enabled for this to work correctly.
     // Adds the text.html scope with chars . and # to auto trigger the completion list
     "auto_trigger_emmet_completions": true,
-    "emmet_scope": "text.html.basic, source.cshtml",
+    "emmet_scope": "text.html, source.cshtml, source.jade",
     "css_extension": [".css",".less",".scss"],
     "pseudo_selector_list": [
         "after",
