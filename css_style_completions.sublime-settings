@@ -5,7 +5,7 @@
     "save_cache_to_file": true,
     "css_completion_scope": "meta.selector.css",
     "html_attribute_scope": "string.quoted.double.html, string.quoted.single.html, string.quoted.jade",
-    // attempts to find <link/>'d style sheets in text.html scoped files on save
+    // attempts to find <link/>'d style sheets in 'emmet_scoped' scoped files on save
     "index_linked_style_sheets": true,
     // returns class/id completions when typing out emmet expressions
     "use_emmet": true,

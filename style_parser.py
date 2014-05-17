@@ -39,11 +39,13 @@ def _find_file(name, path):
 
 
 def load_linked_files(view):
-    if settings.get('index_linked_style_sheets', True) and view.score_selector(0, 'text.html'):
+    html_scope = settings.get('emmet_scope', '')
+    if settings.get('index_linked_style_sheets', True) and view.score_selector(0, html_scope):
         import ntpath
         files = []
         links = []
-        view.find_all(r'<link.*href\s*=\s*"(.*?)"', 0, r'$1', links)
+        # regex should find, html|jade|haml style links
+        view.find_all(r'(<link|link\s*\(?\{?).*href\s*(=|=>)\s*("|\')(.*?)("|\')', 0, r'$4', links)
         for path in view.window().folders():
             for css_path in links:
                 files.extend(_find_file(ntpath.basename(css_path), path))
