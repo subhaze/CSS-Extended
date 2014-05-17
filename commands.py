@@ -82,7 +82,7 @@ def lessMixinCompletionSet(view, region, file_name):
 symbol_dict = {
     'class': 'entity.other.attribute-name.class.css - entity.other.less.mixin',
     'id': 'entity.other.attribute-name.id.css',
-    'less_var': 'variable.other.less',
+    'less_var': 'variable.declaration.less',
     'less_mixin': 'entity.other.less.mixin',
     'scss_var': 'variable.scss',
     'scss_mixin': 'meta.at-rule.mixin.scss entity.name.function.scss',
