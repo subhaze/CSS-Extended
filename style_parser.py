@@ -30,6 +30,26 @@ def create_output_panel(name):
         return sublime.active_window().create_output_panel(name)
 
 
+def _find_file(name, path):
+    result = []
+    for root, dirs, files in os.walk(path):
+        if name in files:
+            result.append(os.path.join(root, name))
+    return result
+
+
+def load_linked_files(view):
+    if settings.get('index_linked_style_sheets', True) and view.score_selector(0, 'text.html'):
+        import ntpath
+        files = []
+        links = []
+        view.find_all(r'<link.*href\s*=\s*"(.*?)"', 0, r'$1', links)
+        for path in view.window().folders():
+            for css_path in links:
+                files.extend(_find_file(ntpath.basename(css_path), path))
+        load_external_files(files, as_scratch=False)
+
+
 def load_external_files(file_list, as_scratch=True):
     global scratch_view
     syntax_file = {

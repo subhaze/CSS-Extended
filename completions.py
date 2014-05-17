@@ -7,11 +7,13 @@ if ST2:
     import settings
     import commands
     import project
+    import style_parser
 else:
     from . import cache
     from . import settings
     from . import commands
     from . import project
+    from . import style_parser
 
 
 def returnPseudoCompletions():
@@ -88,6 +90,7 @@ def _returnViewCompletions(view):
 
 
 def update(view):
+    style_parser.load_linked_files(view)
     projects_cache = cache.projects_cache
     file_key, project_key = cache.get_keys(view)
     # if there is no project_key set the project_key as the file_key

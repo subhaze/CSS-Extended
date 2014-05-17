@@ -5,8 +5,8 @@
     "save_cache_to_file": true,
     "css_completion_scope": "meta.selector.css",
     "html_attribute_scope": "string.quoted.double.html, string.quoted.single.html, string.quoted.jade",
-    // enables indexing of HTML class/id attributes that are not in cache
-    "index_html_attributes": true,
+    // attempts to find <link/>'d style sheets in text.html scoped files on save
+    "index_linked_style_sheets": true,
     // returns class/id completions when typing out emmet expressions
     "use_emmet": true,
     // 'use_emmet' must be enabled for this to work correctly.
