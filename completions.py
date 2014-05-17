@@ -22,6 +22,14 @@ def returnPseudoCompletions():
     ]
 
 
+def returnElementCompletions():
+    element_list = settings.get("element_list")
+    return [
+        (elem + '\t element', elem)
+        for elem in element_list
+    ]
+
+
 def returnSymbolCompletions(view, symbol_type):
     projects_cache = cache.projects_cache
     if not symbol_type in commands.symbol_dict:

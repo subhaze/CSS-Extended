@@ -141,6 +141,13 @@ class CssStyleCompletionEvent(sublime_plugin.EventListener):
                 ), sublime.INHIBIT_EXPLICIT_COMPLETIONS | sublime.INHIBIT_WORD_COMPLETIONS
             )
 
+        # return element list
+        if view.match_selector(
+            locations[0],
+            'source.css, source.less, source.scss'
+        ):
+            return (completions.returnElementCompletions(), sublime.INHIBIT_WORD_COMPLETIONS)
+
         return None
 
 if ST2:
