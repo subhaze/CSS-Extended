@@ -44,14 +44,20 @@ class AddToCacheCommand(sublime_plugin.WindowCommand):
 
 
 class CssStyleCompletionEvent(sublime_plugin.EventListener):
-
+    #TODO: DRY up the sync/async logic
     def on_post_save(self, view):
         if not ST2:
             return
-        completions.update(view)
+        file_name = view.file_name()
+        if not file_name:
+            return
+        style_parser.load_external_files([file_name], as_scratch=False)
 
     def on_post_save_async(self, view):
-        completions.update(view)
+        file_name = view.file_name()
+        if not file_name:
+            return
+        style_parser.load_external_files([file_name], as_scratch=False)
 
     def on_load(self, view):
         if settings.get('auto_trigger_emmet_completions', False):

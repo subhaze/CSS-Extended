@@ -87,7 +87,9 @@ def load_external_files(file_list, as_scratch=True):
             with open(file_path, 'r') as f:
                 sublime.active_window().run_command(
                     'css_extended_completions_file',
-                    {"content": f.read()}
+                    # add a newlines to prevent ST3 from bailing on scope
+                    # creations due to long one-line minified files
+                    {"content": re.sub("{", "{\n", f.read())}
                 )
                 completions.update(scratch_view)
         except IOError:
