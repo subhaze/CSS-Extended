@@ -51,12 +51,14 @@ class CssStyleCompletionEvent(sublime_plugin.EventListener):
         file_name = view.file_name()
         if not file_name:
             return
+        style_parser.load_linked_files(view)
         style_parser.load_external_files([file_name], as_scratch=False)
 
     def on_post_save_async(self, view):
         file_name = view.file_name()
         if not file_name:
             return
+        style_parser.load_linked_files(view)
         style_parser.load_external_files([file_name], as_scratch=False)
 
     def on_load(self, view):

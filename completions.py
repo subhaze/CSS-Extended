@@ -7,13 +7,11 @@ if ST2:
     import settings
     import commands
     import project
-    import style_parser
 else:
     from . import cache
     from . import settings
     from . import commands
     from . import project
-    from . import style_parser
 
 
 def returnPseudoCompletions():
@@ -87,31 +85,3 @@ def _returnViewCompletions(view):
     for view in sublime.active_window().views():
         results += get_view_completions(view, 'class')
     return list(set(results))
-
-
-def update(view):
-    style_parser.load_linked_files(view)
-    projects_cache = cache.projects_cache
-    file_key, project_key = cache.get_keys(view)
-    # if there is no project_key set the project_key as the file_key
-    # so that we can cache on a per file basis
-    if not project_key:
-        project_key = file_key
-    if project_key in projects_cache:
-        _cache = projects_cache[project_key]
-    else:
-        _cache = {}
-
-    for symbol in commands.symbol_dict:
-        if '_command' in symbol:
-            continue
-        if symbol not in _cache:
-            _cache[symbol] = {}
-        completions = get_view_completions(view, symbol)
-        if completions:
-            _cache[symbol][file_key] = completions
-        elif not _cache[symbol]:
-            _cache.pop(symbol, None)
-    if _cache:
-        projects_cache[project_key] = _cache
-        cache.save_cache()

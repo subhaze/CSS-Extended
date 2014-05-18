@@ -4,10 +4,14 @@ ST2 = int(sublime.version()) < 3000
 scratch_view = None
 
 if ST2:
+    import cache
+    import commands
     import completions
     import settings
     import project
 else:
+    from . import cache
+    from . import commands
     from . import completions
     from . import settings
     from . import project
@@ -91,7 +95,7 @@ def load_external_files(file_list, as_scratch=True):
                     # creations due to long one-line minified files
                     {"content": re.sub("{", "{\n", f.read())}
                 )
-                completions.update(scratch_view)
+                update_cache(scratch_view)
         except IOError:
             pass
 
@@ -104,6 +108,33 @@ def load_external_files(file_list, as_scratch=True):
             parse_delay
         )
         parse_delay = parse_delay + 250
+
+
+def update_cache(view):
+    projects_cache = cache.projects_cache
+    file_key, project_key = cache.get_keys(view)
+    # if there is no project_key set the project_key as the file_key
+    # so that we can cache on a per file basis
+    if not project_key:
+        project_key = file_key
+    if project_key in projects_cache:
+        _cache = projects_cache[project_key]
+    else:
+        _cache = {}
+
+    for symbol in commands.symbol_dict:
+        if '_command' in symbol:
+            continue
+        if symbol not in _cache:
+            _cache[symbol] = {}
+        _completions = completions.get_view_completions(view, symbol)
+        if _completions:
+            _cache[symbol][file_key] = _completions
+        elif not _cache[symbol]:
+            _cache.pop(symbol, None)
+    if _cache:
+        projects_cache[project_key] = _cache
+        cache.save_cache()
 
 
 class CssExtendedCompletionsFileCommand(sublime_plugin.TextCommand):
