@@ -36,7 +36,7 @@ class AddToCacheCommand(sublime_plugin.WindowCommand):
         current_delay = 100
         for path in paths:
             if os.path.isdir(path):
-                sublime.set_timeout(lambda: style_parser.load_external_files(
+                sublime.set_timeout(lambda: style_parser.load_files(
                     glob.glob(path + os.path.sep + file_type),
                     as_scratch=False
                 ), current_delay)
@@ -52,14 +52,14 @@ class CssStyleCompletionEvent(sublime_plugin.EventListener):
         if not file_name:
             return
         style_parser.load_linked_files(view)
-        style_parser.load_external_files([file_name], as_scratch=False)
+        style_parser.parse_view(view)
 
     def on_post_save_async(self, view):
         file_name = view.file_name()
         if not file_name:
             return
         style_parser.load_linked_files(view)
-        style_parser.load_external_files([file_name], as_scratch=False)
+        style_parser.parse_view(view)
 
     def on_load(self, view):
         if settings.get('auto_trigger_emmet_completions', False):

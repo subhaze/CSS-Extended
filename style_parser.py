@@ -21,7 +21,7 @@ def init_file_loading():
     if not sublime.active_window():
         sublime.set_timeout(lambda: init_file_loading(), 500)
     else:
-        load_external_files(project.get_external_files())
+        load_files(project.get_external_files())
 
 
 def create_output_panel(name):
@@ -53,10 +53,10 @@ def load_linked_files(view):
         for path in view.window().folders():
             for css_path in links:
                 files.extend(_find_file(ntpath.basename(css_path), path))
-        load_external_files(files, as_scratch=False)
+        load_files(files, as_scratch=False)
 
 
-def load_external_files(file_list, as_scratch=True):
+def load_files(file_list, as_scratch=True):
     global scratch_view
     syntax_file = {
         'css': 'Packages/CSS/CSS.tmLanguage',
@@ -76,10 +76,10 @@ def load_external_files(file_list, as_scratch=True):
 
     def parse_file(file_path, indx):
         global scratch_view
-        print('PARSING FILE', file_path)
         file_extension = os.path.splitext(file_path)[1][1:]
         if not file_extension in syntax_file:
             return
+        print('PARSING FILE', file_path)
         if not syntax_file[file_extension] == current_syntax['isThis']:
             scratch_view.set_syntax_file(syntax_file[file_extension])
             current_syntax['isThis'] = syntax_file[file_extension]
@@ -108,6 +108,25 @@ def load_external_files(file_list, as_scratch=True):
             parse_delay
         )
         parse_delay = parse_delay + 250
+
+
+def parse_view(view):
+    global scratch_view
+    file_path = view.file_name()
+    print('PARSING SAVED VIEW')
+    scratch_view.set_syntax_file(view.settings().get('syntax'))
+    try:
+        scratch_view.set_name(file_path)
+        with open(file_path, 'r') as f:
+            sublime.active_window().run_command(
+                'css_extended_completions_file',
+                # add a newlines to prevent ST3 from bailing on scope
+                # creations due to long one-line minified files
+                {"content": re.sub("{", "{\n", f.read())}
+            )
+            update_cache(scratch_view)
+    except IOError:
+        pass
 
 
 def update_cache(view):
