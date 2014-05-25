@@ -19,7 +19,7 @@ def at_html_attribute(attribute, view, locations):
 
 
 def at_style_symbol(style_symbol, style_scope, view, locations):
-    selector = view.match_selector(locations[0], style_scope)
+    selector = view.match_selector(locations[0]-1, style_scope)
     if not selector:
         return False
     check_attribute = ''

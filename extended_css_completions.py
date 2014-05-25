@@ -6,18 +6,20 @@ if ST2:
 else:
     from . import settings
 
-common = {
-    "color": ["rgb($1)", "rgba($1)", "hsl($1)", "hsla($1)", "transparent"],
-    "uri": ["url($1)"],
-    "border-style": ["none", "hidden", "dotted", "dashed", "solid", "double", "groove", "ridge", "inset", "outset"],
-    "border-width": ["thin", "medium", "thick"],
-    "box": ["border-box", "padding-box", "content-box"],
-    "shape": ["rect($1)"],
-    "generic-family": ["serif", "sans-serif", "cursive", "fantasy", "monospace"],
-    "family-name": settings.get('font_list', [])
-}
 
-css_data = """
+def extended_common():
+    return {
+        "color": ["rgb($1)", "rgba($1)", "hsl($1)", "hsla($1)", "transparent"],
+        "uri": ["url($1)"],
+        "border-style": ["none", "hidden", "dotted", "dashed", "solid", "double", "groove", "ridge", "inset", "outset"],
+        "border-width": ["thin", "medium", "thick"],
+        "box": ["border-box", "padding-box", "content-box"],
+        "shape": ["rect($1)"],
+        "generic-family": ["serif", "sans-serif", "cursive", "fantasy", "monospace"],
+        "family-name": settings.get('font_list', [])
+    }
+
+extended_css_data = """
 "font-family"=<family-name> | <generic-family>| inherit
 "display"=flex | inline-flex | compact | container | run-in
 "icon"=auto | <uri> | inherit
@@ -116,8 +118,8 @@ def parse_css_data(data):
             v = v.strip()
             if v[0] == '<' and v[-1] == '>':
                 key = v[1:-1]
-                if key in common:
-                    allowed_values += common[key]
+                if key in extended_common():
+                    allowed_values += extended_common()[key]
             else:
                 allowed_values.append(v)
 
@@ -139,7 +141,7 @@ class CSSCompletions(sublime_plugin.EventListener):
             return []
 
         if not self.props:
-            self.props = parse_css_data(css_data)
+            self.props = parse_css_data(extended_css_data)
             self.rex = re.compile("([a-zA-Z-]+):\s*$")
 
         l = []
