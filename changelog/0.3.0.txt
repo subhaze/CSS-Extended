@@ -1,0 +1,13 @@
+Updates
+
+- Adds scopes for Jade so most completions can be triggered within Jade files
+- Adds updated font-family stack and allows it to be configured via the package settings #21
+- - Uses the stacks found here http://www.awayback.com/revised-font-stack/
+- Adds option to try and parse linked style sheets on document save #21
+- Adds elements to the completion list in CSS files #21
+- - Configurable in the settings file
+
+Bug fixes
+
+- ST3 Issue - Current beta of ST3 will not add scopes to extremely long lines - Package now adds a new line after each "{" character before processing - Fixes #22
+- Fixes scope selector for LESS variable declarations
