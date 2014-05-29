@@ -5,7 +5,10 @@ CSS Extended Completions
 
 ---
 
-This plug-in is beta quality so please file any issues you run into here: https://github.com/subhaze/CSS-Extended/issues?state=open Include Sublime Text version, OS, and any error that you can find in the Sublime Text console (ctrl+`)
+####Issue Reporting
+This plug-in is beta quality so please file any issues you run into here: https://github.com/subhaze/CSS-Extended/issues?state=open
+
+**Please include the following information or the ticket will be closed immediately:** Sublime Text version, OS, and any related error that you can find in the Sublime Text console (ctrl+`) if no related error is found please state that you saw no errors in the console.
 
 _NOTICE_
 
