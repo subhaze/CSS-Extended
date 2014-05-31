@@ -6,13 +6,28 @@ CSS Extended Completions
 ---
 
 ####Issue Reporting
-This plug-in is beta quality so please file any issues you run into here: https://github.com/subhaze/CSS-Extended/issues?state=open
 
-**Please include the following information or the ticket will be closed immediately:** Sublime Text version, OS, and any related error that you can find in the Sublime Text console (ctrl+`) if no related error is found please state that you saw no errors in the console.
+**Please include the following information when submitting a ticket**
+- Sublime Text version
+- OS
+- any related error that you can find in the Sublime Text console (ctrl+`) if no related error is found please state that you saw no errors in the console.
+
+This plug-in is beta quality so please file any issues you run into here: https://github.com/subhaze/CSS-Extended/issues?state=open
 
 _NOTICE_
 
 Due to how Sublime Text 3's CSS Package overrides completions, you *MUST* invoke completions with `ctrl+space` when working within CSS files
+
+---
+###Features
+- CSS class completions within HTML class attributes (class="|") and CSS files
+- ID completions within HTML id attributes (id="|") and CSS files
+- LESS variable and mixin completions (with parametric tab-stops)
+- SCSS variable and mixin completions (with parametric tab-stops)
+- element completions within CSS files
+- pseudo selector completions within CSS files
+- font stack completions within the `font-family:` property
+- a more up-to-date property/value completion list within CSS files
 
 ---
 ###Usage
