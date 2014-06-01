@@ -58,11 +58,15 @@ Example: `"load_external_files": ["/abs/path/to/css/*.css", "/abs/path/to/less/*
 
 ----
 
+####Deleting Cache File
+
+You can delete the cache via the command palette `CSS Completions: Delete Cache`
+
+----
+
 ####Property/Value Completions
 
 property/value completions such as `box-sizing`, additional font names for `font-family`, `animation`, `flex-box`, etc...
-
-You can delete the cache via the command palette `CSS Completions: Delete Cache`
 
 ----
 
