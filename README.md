@@ -28,6 +28,7 @@ Due to how Sublime Text 3's CSS Package overrides completions, you *MUST* invoke
 - pseudo selector completions within CSS files
 - font stack completions within the `font-family:` property
 - a more up-to-date property/value completion list within CSS files
+- parse linked style sheets in HTML files, can be disabled via `index_linked_style_sheets` setting
 
 ---
 ###Usage
