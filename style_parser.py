@@ -53,6 +53,8 @@ def load_linked_files(view):
         for path in view.window().folders():
             for css_path in links:
                 files.extend(_find_file(ntpath.basename(css_path), path))
+        print('Found styles linked in HTML')
+        print(files)
         load_files(files, as_scratch=False)
 
 
@@ -77,8 +79,14 @@ def load_files(file_list, as_scratch=True):
     def parse_file(file_path, indx):
         global scratch_view
         file_extension = os.path.splitext(file_path)[1][1:]
+
+        # Check if we have a syntax file
         if not file_extension in syntax_file:
             return
+        # Check if we match CSS extensions listed
+        if not file_path.endswith(tuple(settings.get('css_extension', ()))):
+            return
+
         print('PARSING FILE', file_path)
         if not syntax_file[file_extension] == current_syntax['isThis']:
             scratch_view.set_syntax_file(syntax_file[file_extension])
@@ -113,6 +121,11 @@ def load_files(file_list, as_scratch=True):
 def parse_view(view):
     global scratch_view
     file_path = view.file_name()
+
+    # Check if we match CSS extensions listed
+    if not file_path.endswith(tuple(settings.get('css_extension', ()))):
+        return
+
     print('PARSING SAVED VIEW')
     scratch_view.set_syntax_file(view.settings().get('syntax'))
     try:
