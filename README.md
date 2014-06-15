@@ -36,6 +36,8 @@ Due to how Sublime Text 3's CSS Package overrides completions, you *MUST* invoke
 
 You can add files from the side bar, just right click on a folder and select the type of files you'd like to load via `CSS Extended Completions > [file type(s)]`
 
+This is *not* a recursive process, so, only the immediate files in the folder are processed, the subfolders are not processed.
+
 ![](https://dl.dropboxusercontent.com/u/4790638/images/ST-load-files-from-side-bar.png)
 
 ----
