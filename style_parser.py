@@ -24,6 +24,12 @@ def init_file_loading():
         load_files(project.get_external_files())
 
 
+def get_encoding(view):
+    view_encoding = view.encoding()
+    encoding = 'utf-8' if view_encoding == 'Undefined' else view_encoding
+    return encoding
+
+
 def create_output_panel(name):
     '''
         Used for loading in files outside of project view
@@ -96,18 +102,20 @@ def load_files(file_list, as_scratch=True):
         )
         try:
             scratch_view.set_name(file_path)
-            with open(file_path, 'r') as f:
+            encoding = get_encoding(scratch_view)
+            with open(file_path, 'r', encoding=encoding) as f:
+                content = re.sub("{", "{\n", f.read())
                 sublime.active_window().run_command(
                     'css_extended_completions_file',
                     # add a newlines to prevent ST3 from bailing on scope
                     # creations due to long one-line minified files
-                    {"content": re.sub("{", "{\n", f.read())}
+                    {"content": content}
                 )
                 update_cache(scratch_view)
         except IOError:
             pass
 
-    parse_delay = 0
+    parse_delay = 100
     for indx, file_path in enumerate(file_list):
         if not os.path.isfile(file_path):
             continue
@@ -130,12 +138,14 @@ def parse_view(view):
     scratch_view.set_syntax_file(view.settings().get('syntax'))
     try:
         scratch_view.set_name(file_path)
-        with open(file_path, 'r') as f:
+        encoding = get_encoding(view)
+        with open(file_path, 'r', encoding=encoding) as f:
+            content = f.read()
             sublime.active_window().run_command(
                 'css_extended_completions_file',
                 # add a newlines to prevent ST3 from bailing on scope
                 # creations due to long one-line minified files
-                {"content": re.sub("{", "{\n", f.read())}
+                {"content": re.sub('{', '{\n', content)}
             )
             update_cache(scratch_view)
     except IOError:
