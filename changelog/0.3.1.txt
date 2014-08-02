@@ -1,0 +1,3 @@
+Bug Fixes
+
+- This update should resolve issues where the plug-in fails to parse files due to Unicode chars
