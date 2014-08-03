@@ -35,6 +35,26 @@ def get_cache_path():
     return _file_path
 
 
+def prune_cache():
+    global projects_cache
+
+    load()
+    missing = []
+    for path in projects_cache:
+        if not os.path.isfile(path) and not os.path.isdir(path):
+            missing.append((projects_cache, path))
+        if os.path.isdir(path):
+            for project in projects_cache[path]:
+                # f (dict of files)
+                for f in projects_cache[path][project]:
+                    if not os.path.isfile(f):
+                        missing.append((projects_cache[path][project],f))
+    print('CSS Extended: Removing %s items from cache.' % len(missing))
+    for items in missing:
+        del items[0][items[1]]
+    save_cache()
+
+
 def remove_cache():
     global _file_path
 

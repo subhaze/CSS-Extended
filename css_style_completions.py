@@ -22,6 +22,13 @@ def plugin_loaded():
     style_parser.init_file_loading()
 
 
+class CssStyleCompletionPruneCacheCommand(sublime_plugin.WindowCommand):
+    """Removes missing files from the cache"""
+
+    def run(self):
+        cache.prune_cache()
+
+
 class CssStyleCompletionDeleteCacheCommand(sublime_plugin.WindowCommand):
     """Deletes all cache that plugin has created"""
 
