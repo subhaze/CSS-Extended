@@ -1,0 +1,6 @@
+Updates
+
+- Allows default CSS property/values to flow into the completion list
+- Adds source.stylus to give "some" completions to stylus
+  the stylus syntax file I've installed doesn't have much going on
+  in the scopes, so, there is minimal support.
