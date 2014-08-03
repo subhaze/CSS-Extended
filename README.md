@@ -14,10 +14,6 @@ CSS Extended Completions
 
 This plug-in is beta quality so please file any issues you run into here: https://github.com/subhaze/CSS-Extended/issues?state=open
 
-_NOTICE_
-
-Due to how Sublime Text 3's CSS Package overrides completions, you *MUST* invoke completions with `ctrl+space` when working within CSS files
-
 ---
 ###Features
 - CSS class completions within HTML class attributes (class="|") and CSS files
