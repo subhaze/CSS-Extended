@@ -1,0 +1,3 @@
+Update
+
+- Now overrides ST 3's default behavior of blocking auto completion triggers in CSS scopes
