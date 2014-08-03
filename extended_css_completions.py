@@ -137,7 +137,7 @@ class CSSCompletions(sublime_plugin.EventListener):
     rex = None
 
     def on_query_completions(self, view, prefix, locations):
-        if not view.match_selector(locations[0], "source.css - meta.selector.css"):
+        if not view.match_selector(locations[0], "source.stylus, source.scss - meta.selector.css, source.less - meta.selector.css, source.css - meta.selector.css"):
             return []
 
         if not self.props:
@@ -146,9 +146,9 @@ class CSSCompletions(sublime_plugin.EventListener):
 
         l = []
         if (
-            view.match_selector(locations[0], "meta.property-value.css")
+            view.match_selector(locations[0], "meta.property-value.css, meta.property-value.scss")
             # This will catch scenarios like .foo {font-style: |}
-            or view.match_selector(locations[0] - 1, "meta.property-value.css")
+            or view.match_selector(locations[0] - 1, "meta.property-value.css, meta.property-value.scss")
         ):
             loc = locations[0] - len(prefix)
             line = view.substr(sublime.Region(view.line(loc).begin(), loc))

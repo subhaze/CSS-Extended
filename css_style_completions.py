@@ -152,7 +152,7 @@ class CssStyleCompletionEvent(sublime_plugin.EventListener):
         # return element list
         if view.match_selector(
             locations[0],
-            'source.css, source.less, source.scss'
+            'source.stylus, source.css - meta.property-value.css, source.less - meta.property-value.css, source.scss - meta.property-value.scss'
         ):
             return (completions.returnElementCompletions(), sublime.INHIBIT_WORD_COMPLETIONS)
 
