@@ -1,0 +1,3 @@
+Updates
+
+- Adds new command 'CSS Completions: Prune Cache' so you can remove missing/moved files from cache without having to delete the entire cache

@@ -63,6 +63,12 @@ You can delete the cache via the command palette `CSS Completions: Delete Cache`
 
 ----
 
+####Pruning Cache File
+
+You can remove missing/moved files from the cache via the command palette `CSS Completions: Prune Cache`
+
+----
+
 ####Property/Value Completions
 
 property/value completions such as `box-sizing`, additional font names for `font-family`, `animation`, `flex-box`, etc...
