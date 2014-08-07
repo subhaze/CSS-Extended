@@ -12,7 +12,7 @@
     // 'use_emmet' must be enabled for this to work correctly.
     // Adds the text.html scope with chars . and # to auto trigger the completion list
     "auto_trigger_emmet_completions": true,
-    "emmet_scope": "text.html, source.cshtml, source.jade",
+    "emmet_scope": "text.html - source.js, source.cshtml, source.jade",
     "css_extension": [".css",".less",".scss"],
 
     // List from http://www.awayback.com/revised-font-stack/

@@ -1,7 +1,6 @@
 import sublime, sublime_plugin, os, re
 
 ST2 = int(sublime.version()) < 3000
-scratch_view = None
 
 if ST2:
     import cache
@@ -30,7 +29,7 @@ def get_encoding(view):
     return encoding
 
 
-def create_output_panel(name):
+def get_output_panel(name='CSS Extended Completions'):
     '''
         Used for loading in files outside of project view
     '''
@@ -65,15 +64,13 @@ def load_linked_files(view):
 
 
 def load_files(file_list, as_scratch=True):
-    global scratch_view
     syntax_file = {
         'css': 'Packages/CSS/CSS.tmLanguage',
         'less': 'Packages/LESS/LESS.tmLanguage',
         'scss': 'Packages/SCSS/SCSS.tmLanguage'
     }
 
-    scratch_view = create_output_panel('CSS Extended Completions')
-    scratch_view.set_scratch(as_scratch)
+    get_output_panel().set_scratch(as_scratch)
     # sort file list by extension to reduce the frequency
     # of syntax file loads
     sorted(file_list, key=lambda x: x.split(".")[-1])
@@ -83,7 +80,6 @@ def load_files(file_list, as_scratch=True):
     file_count = len(file_list)
 
     def parse_file(file_path, indx):
-        global scratch_view
         file_extension = os.path.splitext(file_path)[1][1:]
 
         # Check if we have a syntax file
@@ -95,14 +91,14 @@ def load_files(file_list, as_scratch=True):
 
         print('PARSING FILE', file_path)
         if not syntax_file[file_extension] == current_syntax['isThis']:
-            scratch_view.set_syntax_file(syntax_file[file_extension])
+            get_output_panel().set_syntax_file(syntax_file[file_extension])
             current_syntax['isThis'] = syntax_file[file_extension]
         sublime.status_message(
             'CSS Extended: parsing file %s of %s' % (indx + 1, file_count)
         )
         try:
-            scratch_view.set_name(file_path)
-            encoding = get_encoding(scratch_view)
+            get_output_panel().set_name(file_path)
+            encoding = get_encoding(get_output_panel())
             with open(file_path, 'r', encoding=encoding) as f:
                 content = re.sub("{", "{\n", f.read())
                 sublime.active_window().run_command(
@@ -111,7 +107,7 @@ def load_files(file_list, as_scratch=True):
                     # creations due to long one-line minified files
                     {"content": content}
                 )
-                update_cache(scratch_view)
+                update_cache(get_output_panel())
         except IOError:
             pass
 
@@ -127,7 +123,6 @@ def load_files(file_list, as_scratch=True):
 
 
 def parse_view(view):
-    global scratch_view
     file_path = view.file_name()
 
     # Check if we match CSS extensions listed
@@ -135,9 +130,9 @@ def parse_view(view):
         return
 
     print('PARSING SAVED VIEW')
-    scratch_view.set_syntax_file(view.settings().get('syntax'))
+    get_output_panel().set_syntax_file(view.settings().get('syntax'))
     try:
-        scratch_view.set_name(file_path)
+        get_output_panel().set_name(file_path)
         encoding = get_encoding(view)
         with open(file_path, 'r', encoding=encoding) as f:
             content = f.read()
@@ -147,7 +142,7 @@ def parse_view(view):
                 # creations due to long one-line minified files
                 {"content": re.sub('{', '{\n', content)}
             )
-            update_cache(scratch_view)
+            update_cache(get_output_panel())
     except IOError:
         pass
 
@@ -180,11 +175,10 @@ def update_cache(view):
 
 
 class CssExtendedCompletionsFileCommand(sublime_plugin.TextCommand):
-    global scratch_view
 
     def run(self, edit, content):
         # add space between any )} chars
         # ST3 throws an error in some LESS files that do this
         content = re.sub(r'\)\}', r') }', content)
-        scratch_view.erase(edit, sublime.Region(0, scratch_view.size()))
-        scratch_view.insert(edit, 0, content)
+        get_output_panel().erase(edit, sublime.Region(0, get_output_panel().size()))
+        get_output_panel().insert(edit, 0, content)
