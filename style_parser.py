@@ -1,6 +1,7 @@
 import sublime, sublime_plugin, os, re
 
 ST2 = int(sublime.version()) < 3000
+scratch_view = None
 
 if ST2:
     import cache
@@ -33,10 +34,13 @@ def get_output_panel(name='CSS Extended Completions'):
     '''
         Used for loading in files outside of project view
     '''
-    if ST2:
-        return sublime.active_window().get_output_panel(name)
-    else:
-        return sublime.active_window().create_output_panel(name)
+    global scratch_view
+    if not scratch_view:
+        if ST2:
+            scratch_view = sublime.active_window().get_output_panel(name)
+        else:
+            scratch_view = sublime.active_window().create_output_panel(name)
+    return scratch_view
 
 
 def _find_file(name, path):

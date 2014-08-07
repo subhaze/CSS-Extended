@@ -137,6 +137,16 @@ class CssStyleCompletionEvent(sublime_plugin.EventListener):
 
         # inside SCSS scope symbol completions
         if location.at_style_symbol(
+            '.', 'source.scss',
+            view, locations
+        ):
+            return (
+                completions.returnSymbolCompletions(
+                    view, 'class'
+                ), sublime.INHIBIT_EXPLICIT_COMPLETIONS | sublime.INHIBIT_WORD_COMPLETIONS
+            )
+
+        if location.at_style_symbol(
             '$', 'source.scss, meta.property-value.scss',
             view, locations
         ):
