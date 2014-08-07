@@ -1,0 +1,4 @@
+Updates
+
+- Should now prevent CSS completions from popping up while typing `.` within embedded JS in HTML 
+- Fixes issue where 'scratch_view' is, sometimes, not initialized correctly
