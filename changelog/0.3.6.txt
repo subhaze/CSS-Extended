@@ -1,0 +1,6 @@
+Updates
+
+- Fixes scratch view regression from previous build
+- Adds scss class name completions
+
+Recommend to restart Sublime
