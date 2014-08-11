@@ -40,7 +40,7 @@ class CssStyleCompletionDeleteCacheCommand(sublime_plugin.WindowCommand):
 class AddToCacheCommand(sublime_plugin.WindowCommand):
     def run(self, paths=[], name="", file_type="*.*"):
         import glob
-        current_delay = 100
+        current_delay = 500
         for path in paths:
             if os.path.isdir(path):
                 sublime.set_timeout(lambda: style_parser.load_files(

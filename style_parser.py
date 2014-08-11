@@ -123,7 +123,7 @@ def load_files(file_list, as_scratch=True):
             lambda file_path=file_path, indx=indx: parse_file(file_path, indx),
             parse_delay
         )
-        parse_delay = parse_delay + 250
+        parse_delay = parse_delay + 500
 
 
 def parse_view(view):
