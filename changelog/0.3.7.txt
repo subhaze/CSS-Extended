@@ -1,0 +1,3 @@
+Updates
+
+- Adds 'placeholder' completions for SCSS
