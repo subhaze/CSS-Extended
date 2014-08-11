@@ -86,6 +86,7 @@ symbol_dict = {
     'less_mixin': 'entity.other.less.mixin',
     'scss_var': 'variable.scss',
     'scss_mixin': 'meta.at-rule.mixin.scss entity.name.function.scss',
+    'scss_placeholder': 'entity.other.attribute-name.placeholder.scss',
 
     # Define commands for each symbol type...
     'class_command': simpleCompletionSet,
@@ -93,7 +94,8 @@ symbol_dict = {
     'less_var_command': simpleCompletionSet,
     'less_mixin_command': lessMixinCompletionSet,
     'scss_var_command': simpleCompletionSet,
-    'scss_mixin_command': scssMixinCompletionSet
+    'scss_mixin_command': scssMixinCompletionSet,
+    'scss_placeholder_command': simpleCompletionSet
 }
 
 
