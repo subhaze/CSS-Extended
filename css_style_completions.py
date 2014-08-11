@@ -153,7 +153,7 @@ class CssStyleCompletionEvent(sublime_plugin.EventListener):
             return (
                 completions.returnSymbolCompletions(
                     view, 'scss_placeholder'
-                ), sublime.INHIBIT_EXPLICIT_COMPLETIONS
+                ), sublime.INHIBIT_EXPLICIT_COMPLETIONS | sublime.INHIBIT_WORD_COMPLETIONS
             )
 
         if location.at_style_symbol(
