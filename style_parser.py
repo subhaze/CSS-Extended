@@ -1,4 +1,4 @@
-import sublime, sublime_plugin, os, re
+import sublime, sublime_plugin, os, re, time
 
 ST2 = int(sublime.version()) < 3000
 scratch_view = None
@@ -22,12 +22,6 @@ def init_file_loading():
         sublime.set_timeout(lambda: init_file_loading(), 500)
     else:
         load_files(project.get_external_files())
-
-
-def get_encoding(view):
-    view_encoding = view.encoding()
-    encoding = 'utf-8' if view_encoding == 'Undefined' else view_encoding
-    return encoding
 
 
 def get_output_panel(name='CSS Extended Completions'):
@@ -102,13 +96,10 @@ def load_files(file_list, as_scratch=True):
         )
         try:
             get_output_panel().set_name(file_path)
-            encoding = get_encoding(get_output_panel())
-            with open(file_path, 'r', encoding=encoding) as f:
-                content = re.sub("{", "{\n", f.read())
+            with open(file_path, 'r') as f:
+                content = f.read()
                 sublime.active_window().run_command(
                     'css_extended_completions_file',
-                    # add a newlines to prevent ST3 from bailing on scope
-                    # creations due to long one-line minified files
                     {"content": content}
                 )
                 update_cache(get_output_panel())
@@ -137,14 +128,11 @@ def parse_view(view):
     get_output_panel().set_syntax_file(view.settings().get('syntax'))
     try:
         get_output_panel().set_name(file_path)
-        encoding = get_encoding(view)
-        with open(file_path, 'r', encoding=encoding) as f:
+        with open(file_path, 'r') as f:
             content = f.read()
             sublime.active_window().run_command(
                 'css_extended_completions_file',
-                # add a newlines to prevent ST3 from bailing on scope
-                # creations due to long one-line minified files
-                {"content": re.sub('{', '{\n', content)}
+                {"content": content}
             )
             update_cache(get_output_panel())
     except IOError:
@@ -184,5 +172,11 @@ class CssExtendedCompletionsFileCommand(sublime_plugin.TextCommand):
         # add space between any )} chars
         # ST3 throws an error in some LESS files that do this
         content = re.sub(r'\)\}', r') }', content)
-        get_output_panel().erase(edit, sublime.Region(0, get_output_panel().size()))
-        get_output_panel().insert(edit, 0, content)
+        content = re.sub(r'\}', '}\n', content)
+        content = re.sub(r'\*/', '*/\n', content)
+        panel = get_output_panel()
+        panel.erase(edit, sublime.Region(0, panel.size()))
+        panel.insert(edit, 0, content)
+        # call size to force ST to acknowledge new content
+        # sometimes it seems to fail on knowing new content is there
+        panel.size()
