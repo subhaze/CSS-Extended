@@ -1,0 +1,4 @@
+Updates/Fixes
+
+Hopefully this release will resolve issues with encoding errors and some crashing
+that's been happening.
