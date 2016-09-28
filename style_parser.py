@@ -96,7 +96,7 @@ def load_files(file_list, as_scratch=True):
         )
         try:
             get_output_panel().set_name(file_path)
-            with open(file_path, 'r') as f:
+            with open(file_path, 'r', encoding='utf8') as f:
                 content = f.read()
                 sublime.active_window().run_command(
                     'css_extended_completions_file',
@@ -128,7 +128,7 @@ def parse_view(view):
     get_output_panel().set_syntax_file(view.settings().get('syntax'))
     try:
         get_output_panel().set_name(file_path)
-        with open(file_path, 'r') as f:
+        with open(file_path, 'r', encoding='utf8') as f:
             content = f.read()
             sublime.active_window().run_command(
                 'css_extended_completions_file',
