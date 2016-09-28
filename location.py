@@ -6,10 +6,10 @@ def at_html_attribute(attribute, view, locations):
     view_point = locations[0]
     char = ''
     selector_score = 1
-    while((char != ' ' or selector_score != 0) and view_point > -1):
+    while((not char.isspace() or selector_score != 0) and view_point > -1):
         char = view.substr(view_point)
         selector_score = view.score_selector(view_point, 'string')
-        if(char != ' ' or selector_score != 0):
+        if(not char.isspace() or selector_score != 0):
             check_attribute += char
         view_point -= 1
     check_attribute = check_attribute[::-1].replace('(', '')
